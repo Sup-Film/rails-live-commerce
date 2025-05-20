@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Facebook App</title>
+    <%= csrf_meta_tags %> <%= csp_meta_tag %>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                50: '#eef2ff',
+                100: '#e0e7ff',
+                200: '#c7d2fe',
+                300: '#a5b4fc',
+                400: '#818cf8',
+                500: '#6366f1',
+                600: '#4f46e5',
+                700: '#4338ca',
+                800: '#3730a3',
+                900: '#312e81',
+              }
+            },
+          }
+        }
+      }
+    </script>
+    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track': 'reload' %>
+  </head>
+
+  <body class="bg-gray-900 text-gray-100 min-h-screen">
+    <header class="bg-gray-800 shadow-md">
+      <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-primary-500">FbConnect</h2>
+        <div class="flex items-center space-x-4">
+          <% if defined?(current_user) && current_user %>
+            <span class="text-sm text-gray-300"><%= current_user.name %></span>
+          <% end %>
+        </div>
+      </div>
+    </header>
+    <main class="container mx-auto px-4 py-8 max-w-5xl">
+      <% if notice %>
+      <div
+        class="bg-green-900/30 border-l-4 border-green-500 text-green-300 p-4 mb-6 rounded shadow-lg">
+        <%= notice %>
+      </div>
+      <% end %> <% if alert %>
+      <div
+        class="bg-red-900/30 border-l-4 border-red-500 text-red-300 p-4 mb-6 rounded shadow-lg">
+        <%= alert %>
+      </div>
+      <% end %> <%= yield %>
+    </main>
+
+    <footer class="bg-gray-800 py-4 mt-8">
+      <div class="container mx-auto px-4 text-center text-gray-400 text-sm">
+        &copy; <%= Time.current.year %> FbConnect | <a href="#" class="hover:text-primary-400 transition-colors">Privacy Policy</a> | <a href="#" class="hover:text-primary-400 transition-colors">Terms of Service</a>
+      </div>
+    </footer>
+  </body>
+</html>
