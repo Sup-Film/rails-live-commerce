@@ -78,7 +78,4 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  <<: *default
-  database: rails_facebook_api_new_production
-  username: rails_facebook_api_new
-  password: <%= ENV["RAILS_FACEBOOK_API_NEW_DATABASE_PASSWORD"] %>
+  url: <%= ENV["DATABASE_URL"] %>
