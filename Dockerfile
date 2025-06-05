@@ -59,4 +59,5 @@ ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
+ENV SECRET_KEY_BASE=d0d4a3bc8ae87400e28bdda150745dffd5c6a9c49eb03f72d60c91758346da3c0483fa593c87fc5bf0c8d6bff2abefe207b5a8aed1e4ad28b2b6271cd0bcc73d
 CMD ["./bin/rails", "server"]
