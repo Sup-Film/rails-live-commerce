@@ -8,12 +8,13 @@ class FacebookLiveWebhookService
   end
 
   def process
+    p "Processing Facebook Live webhook data: #{data}"
     return unless data['entry'] # ตรวจสอบว่ามีข้อมูล entry หรือไม่
 
     # ตรวจสอบว่า data มี key 'entry' และเป็น Array หรือไม่
-    data['entry'].each do |entry|
-      process_entry(entry)
-    end
+    # data['entry'].each do |entry|
+    #   process_entry(entry)
+    # end
   end
   
   private
