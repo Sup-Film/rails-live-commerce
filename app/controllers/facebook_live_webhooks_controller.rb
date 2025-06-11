@@ -33,7 +33,7 @@ class FacebookLiveWebhooksController < ApplicationController
     # เรียกใช้ service ที่จัดการกับ webhook
     # โดยส่ง webhook_params ที่ได้รับจาก Facebook
     p webhook_params
-    # FacebookLiveWebhookService.new(webhook_params).process
+    FacebookLiveWebhookService.new(webhook_params).process
     render json: { status: 'ok'}, status: :ok
   rescue StandardError => e
     Rails.logger.error "Error processing Facebook Live webhook: #{e.message}"
