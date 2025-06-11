@@ -25,10 +25,6 @@ class FacebookLiveWebhooksController < ApplicationController
 
   # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook
   def receive
-    Rails.logger.info "[Webhook] Entered receive action"
-    Rails.logger.info "[Webhook] Raw params: #{params.to_unsafe_h.inspect}"
-    Rails.logger.info "Received Facebook Live webhook: #{webhook_params.inspect}"
-    
     # เรียกใช้ service ที่จัดการกับ webhook
     # โดยส่ง webhook_params ที่ได้รับจาก Facebook
     p webhook_params

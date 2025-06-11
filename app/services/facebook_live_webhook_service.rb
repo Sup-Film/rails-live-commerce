@@ -8,13 +8,13 @@ class FacebookLiveWebhookService
   end
 
   def process
-    p "Processing Facebook Live webhook data: #{data}"
     return unless data['entry'] # ตรวจสอบว่ามีข้อมูล entry หรือไม่
 
     # ตรวจสอบว่า data มี key 'entry' และเป็น Array หรือไม่
-    # data['entry'].each do |entry|
-    #   process_entry(entry)
-    # end
+    data['entry'].each do |entry|
+      # Rails.logger.info "Processing entry: #{entry.inspect}"
+      process_entry(entry)
+    end
   end
   
   private
@@ -22,6 +22,7 @@ class FacebookLiveWebhookService
   def process_entry(entry)
     # ประมวลผล changes ต่างๆ ที่เกี่ยวกับ Live Video
     entry['changes']&.each do |change|
+      # Rails.logger.info "Processing change: #{change.inspect}"
       process_live_change(change) if live_video_change?(change)
     end
   end
@@ -31,15 +32,17 @@ class FacebookLiveWebhookService
   end
 
   def process_live_change(change)
+    # Rails.logger.info "Processing live change: #{change.inspect}"
     value = change['value']
     
     case value['status']
-    when 'LIVE'
-      handle_live_started(value)
-    when 'LIVE_STOPPED'
-      handle_live_ended(value)
-    when 'VOD'
-      handle_live_to_vod(value)
+    when 'live'
+      # handle_live_started(value)
+    when 'live_stopped'
+      Rails.logger.info "Live stopped event received: #{value}"
+      # handle_live_ended(value)
+    when 'vod'
+      # handle_live_to_vod(value)
     end
   end
 
