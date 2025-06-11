@@ -25,9 +25,8 @@ class FacebookLiveWebhooksController < ApplicationController
 
   # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook
   def receive
-    # สร้าง service สำหรับจัดการ webhook
-    # และเรียกใช้งาน process method
-    # webhook_params จะถูกใช้ในการตรวจสอบความถูกต้องของ signature
+    Rails.logger.info "[Webhook] Entered receive action"
+    Rails.logger.info "[Webhook] Raw params: #{params.to_unsafe_h.inspect}"
     Rails.logger.info "Received Facebook Live webhook: #{webhook_params.inspect}"
     
     # เรียกใช้ service ที่จัดการกับ webhook
@@ -41,11 +40,10 @@ class FacebookLiveWebhooksController < ApplicationController
   end
 
   private
-  
-  # ตรวจสอบความถูกต้องของ signature ที่ Facebook ส่งมา
+
+  # รับ params ทั้งหมด ไม่ require :object
   def webhook_params
-    params.require(:object)
-    params.permit!
+    params.permit! # รับทุก key
   end
   
   def verifyRequestSignature
