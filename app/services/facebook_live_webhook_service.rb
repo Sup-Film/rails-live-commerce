@@ -1,10 +1,11 @@
 class FacebookLiveWebhookService
   # @param data [Hash] ข้อมูลที่ได้รับจาก Facebook Live webhook
-  attr_reader :data
+  attr_reader :data, :access_token
 
   # สร้างอินสแตนซ์ของ FacebookLiveWebhookService
-  def initialize(data)
+  def initialize(data, access_token = nil)
     @data = data
+    @access_token = access_token
   end
 
   def process
@@ -37,21 +38,22 @@ class FacebookLiveWebhookService
     
     case value['status']
     when 'live'
-      # handle_live_started(value)
+      handle_live_started(value)
     when 'live_stopped'
-      Rails.logger.info "Live stopped event received: #{value}"
-      # handle_live_ended(value)
+      handle_live_ended(value)
     when 'vod'
       # handle_live_to_vod(value)
     end
   end
 
   def handle_live_started(value)
-    FacebookLiveProcessor.new(value).process_live_start
+    # FacebookLiveProcessor.new(value).process_live_start
+    FacebookLiveCommentService.new(value['id'], access_token).fetch_comments
   end
 
   def handle_live_ended(value)
-    FacebookLiveProcessor.new(value).process_live_end
+    # FacebookLiveProcessor.new(value).process_live_end
+    FacebookLiveCommentService.new(value['id'], access_token).fetch_comments
   end
 
   def handle_live_to_vod(value)

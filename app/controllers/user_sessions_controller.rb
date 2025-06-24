@@ -4,6 +4,8 @@ class UserSessionsController < ApplicationController
 
   def create
     auth = request.env["omniauth.auth"]
+    access_token = auth.credentials.token
+    email = auth.info.email
 
     if auth.nil?
       redirect_to root_path, alert: "Authentication failed!"

@@ -25,10 +25,16 @@ class FacebookLiveWebhooksController < ApplicationController
 
   # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook
   def receive
-    # เรียกใช้ service ที่จัดการกับ webhook
-    # โดยส่ง webhook_params ที่ได้รับจาก Facebook
-    p webhook_params
-    FacebookLiveWebhookService.new(webhook_params).process
+    # Rails.logger.info "Received Facebook Live webhook: #{JSON.pretty_generate(webhook_params.to_h)}"
+
+    # ดึง UID ของ user เพื่อใช้ในการดึง access token
+    # webhook_params['entry'].first['uid'] if webhook_params['entry'].present? && webhook_params['entry'].first['uid'].present?
+    uid = "2926531014188313"
+    user = User.find_by(uid: uid) if uid.present?
+    access_token = user&.oauth_token
+
+    # เรียกใช้ service ที่จัดการกับ webhook โดยส่ง webhook_params ที่ได้รับจาก Facebook
+    FacebookLiveWebhookService.new(webhook_params, access_token).process
     render json: { status: 'ok'}, status: :ok
   rescue StandardError => e
     Rails.logger.error "Error processing Facebook Live webhook: #{e.message}"

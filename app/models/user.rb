@@ -1,3 +1,18 @@
+# == Schema Information
+#
+# Table name: users
+#
+#  id               :bigint           not null, primary key
+#  provider         :string
+#  uid              :string
+#  name             :string
+#  email            :string
+#  image            :string
+#  oauth_token      :string
+#  oauth_expires_at :datetime
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#
 class User < ApplicationRecord
   validates :provider, :uid, presence: true
   validates :uid, uniqueness: { scope: :provider }

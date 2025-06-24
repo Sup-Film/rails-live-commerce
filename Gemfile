@@ -74,6 +74,7 @@ group :development do
   gem 'listen', '~> 3.8'
   gem 'error_highlight'
   gem 'annotate'
+  gem 'lograge'
 end
 
 group :test do

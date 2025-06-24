@@ -12,9 +12,9 @@ Rails.application.routes.draw do
   
   # Facebook API routes
   get '/facebook/profile', to: 'facebook#profile', as: :facebook_profile
-  get '/facebook/posts', to: 'facebook#posts', as: :facebook_posts
-  get '/facebook/friends', to: 'facebook#friends', as: :facebook_friends
-  get '/facebook/photos', to: 'facebook#photos', as: :facebook_photos
+  # get '/facebook/posts', to: 'facebook#posts', as: :facebook_posts
+  # get '/facebook/friends', to: 'facebook#friends', as: :facebook_friends
+  # get '/facebook/photos', to: 'facebook#photos', as: :facebook_photos
 
   # Facebook Live Webhook routes
   get '/facebook/live/webhooks', to: 'facebook_live_webhooks#verify'

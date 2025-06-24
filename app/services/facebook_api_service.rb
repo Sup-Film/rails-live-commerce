@@ -1,5 +1,5 @@
 class FacebookApiService
-  BASE_URL = "https://graph.facebook.com/v17.0"
+  BASE_URL = "https://graph.facebook.com/v23.0"
 
   def initialize(access_token)
     @access_token = access_token
@@ -9,17 +9,17 @@ class FacebookApiService
     get_resource("/me", { fields: fields })
   end
 
-  def get_posts(limit = 5)
-    get_resource("/me/feed", { limit: limit })
-  end
+  # def get_posts(limit = 5)
+  #   get_resource("/me/feed", { limit: limit })
+  # end
 
-  def get_friends(limit = 10)
-    get_resource("/me/friends", { limit: limit })
-  end
+  # def get_friends(limit = 10)
+  #   get_resource("/me/friends", { limit: limit })
+  # end
 
-  def get_photos(limit = 10)
-    get_resource("/me/photos", { limit: limit })
-  end
+  # def get_photos(limit = 10)
+  #   get_resource("/me/photos", { limit: limit })
+  # end
 
   private
 
@@ -28,7 +28,7 @@ class FacebookApiService
     
     begin
       response = HTTParty.get("#{BASE_URL}#{path}", query: params)
-      
+
       if response.success?
         JSON.parse(response.body)
       else

@@ -10,9 +10,30 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_20_093528) do
+ActiveRecord::Schema[7.1].define(version: 2025_06_24_044612) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "facebook_webhook_events", force: :cascade do |t|
+    t.string "facebook_id"
+    t.string "event_type"
+    t.text "payload"
+    t.datetime "processed_at"
+    t.string "status"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "products", force: :cascade do |t|
+    t.string "image"
+    t.string "productName"
+    t.text "productDetail"
+    t.decimal "productPrice"
+    t.integer "productCode"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string "provider"

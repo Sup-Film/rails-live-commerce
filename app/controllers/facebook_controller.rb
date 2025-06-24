@@ -11,35 +11,35 @@ class FacebookController < ApplicationController
     end
   end
   
-  def posts
-    service = FacebookApiService.new(current_user.oauth_token)
-    @posts = service.get_posts(params[:limit] || 5)
+  # def posts
+  #   service = FacebookApiService.new(current_user.oauth_token)
+  #   @posts = service.get_posts(params[:limit] || 5)
     
-    respond_to do |format|
-      format.html
-      format.json { render json: @posts }
-    end
-  end
+  #   respond_to do |format|
+  #     format.html
+  #     format.json { render json: @posts }
+  #   end
+  # end
   
-  def friends
-    service = FacebookApiService.new(current_user.oauth_token)
-    @friends = service.get_friends(params[:limit] || 10)
+  # def friends
+  #   service = FacebookApiService.new(current_user.oauth_token)
+  #   @friends = service.get_friends(params[:limit] || 10)
     
-    respond_to do |format|
-      format.html
-      format.json { render json: @friends }
-    end
-  end
+  #   respond_to do |format|
+  #     format.html
+  #     format.json { render json: @friends }
+  #   end
+  # end
   
-  def photos
-    service = FacebookApiService.new(current_user.oauth_token)
-    @photos = service.get_photos(params[:limit] || 10)
+  # def photos
+  #   service = FacebookApiService.new(current_user.oauth_token)
+  #   @photos = service.get_photos(params[:limit] || 10)
     
-    respond_to do |format|
-      format.html
-      format.json { render json: @photos }
-    end
-  end
+  #   respond_to do |format|
+  #     format.html
+  #     format.json { render json: @photos }
+  #   end
+  # end
   
   private
   
