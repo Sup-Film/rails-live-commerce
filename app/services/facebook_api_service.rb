@@ -25,7 +25,7 @@ class FacebookApiService
 
   def get_resource(path, params = {})
     params[:access_token] = @access_token
-    
+
     begin
       response = HTTParty.get("#{BASE_URL}#{path}", query: params)
 
