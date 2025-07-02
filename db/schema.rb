@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_06_24_044612) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_02_094037) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -23,6 +23,39 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_24_044612) do
     t.text "error_message"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "orders", force: :cascade do |t|
+    t.string "order_number", null: false
+    t.integer "status", default: 0
+    t.bigint "product_id", null: false
+    t.integer "quantity", default: 1
+    t.decimal "unit_price", precision: 10, scale: 2
+    t.decimal "total_amount", precision: 10, scale: 2
+    t.bigint "user_id", null: false
+    t.string "facebook_live_id"
+    t.string "facebook_comment_id", null: false
+    t.string "facebook_user_id", null: false
+    t.string "facebook_user_name"
+    t.string "customer_name"
+    t.string "customer_phone"
+    t.text "customer_address"
+    t.string "customer_email"
+    t.string "checkout_token", null: false
+    t.datetime "checkout_token_expires_at"
+    t.datetime "comment_time"
+    t.datetime "checkout_completed_at"
+    t.datetime "paid_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checkout_token"], name: "index_orders_on_checkout_token", unique: true
+    t.index ["checkout_token_expires_at"], name: "index_orders_on_checkout_token_expires_at"
+    t.index ["facebook_comment_id", "facebook_user_id", "user_id"], name: "index_orders_on_comment_and_users", unique: true
+    t.index ["facebook_user_id", "created_at"], name: "index_orders_on_facebook_user_id_and_created_at"
+    t.index ["order_number"], name: "index_orders_on_order_number"
+    t.index ["product_id"], name: "index_orders_on_product_id"
+    t.index ["user_id", "status"], name: "index_orders_on_user_id_and_status"
+    t.index ["user_id"], name: "index_orders_on_user_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -47,4 +80,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_06_24_044612) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "orders", "products"
+  add_foreign_key "orders", "users"
 end
