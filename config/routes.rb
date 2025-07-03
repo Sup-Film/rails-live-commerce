@@ -19,4 +19,13 @@ Rails.application.routes.draw do
   # Facebook Live Webhook routes
   get '/facebook/live/webhooks', to: 'facebook_live_webhooks#verify'
   post '/facebook/live/webhooks', to: 'facebook_live_webhooks#receive'
+
+  # Checkout routes
+  get '/checkout', to: 'checkout#index', as: :checkout_index
+  get '/checkout/:token', to: 'checkout#show', as: :checkout
+  patch '/checkout/:token', to: 'checkout#update'
+  get '/checkout/:token/confirmation', to: 'checkout#confirmation', as: :checkout_confirmation
+  patch '/checkout/:token/complete', to: 'checkout#complete', as: :checkout_complete
+  patch '/checkout/:token/cancel', to: 'checkout#cancel', as: :checkout_cancel
+  get '/checkout/expired', to: 'checkout#expired', as: :expired_checkout
 end

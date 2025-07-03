@@ -51,7 +51,7 @@ class Order < ApplicationRecord
 
   # ป้องกันการสร้าง order ซ้ำจาก comment เดียวกันของ user เดียวกัน
   validates :facebook_comment_id, uniqueness: { scope: [:facebook_user_id, :user_id],
-                                        message: "This comment has already been processed for this user" }
+                                                message: "This comment has already been processed for this user" }
   validates :checkout_token, presence: true, uniqueness: true
   validates :unit_price, numericality: { greater_than: 0 }
   validates :quantity, numericality: { greater_than: 0 }
@@ -62,17 +62,16 @@ class Order < ApplicationRecord
     confirmed: 2,
     cancelled: 3,
     refunded: 4,
-    deleted: 5
+    deleted: 5,
   }
 
   before_validation :generate_checkout_token, on: :create # สร้าง checkout token อัตโนมัติ
-  before_validation :set_unit_price_from_product # ตั้งค่า unit_price จาก product
-  before_validation :calculate_total_amount # คำนวณ total_amount ก่อน validation
+  before_save :set_unit_price_from_product
 
   # Scopes สำหรับ query orders ที่ไม่ถูกลบ
-  scope :active, -> { where.not(status: ['cancelled', 'deleted']) }
-  scope :not_deleted, -> { where.not(status: 'deleted') }
-  scope :cancellable, -> { where(status: ['pending', 'paid']) }
+  scope :active, -> { where.not(status: ["cancelled", "deleted"]) }
+  scope :not_deleted, -> { where.not(status: "deleted") }
+  scope :cancellable, -> { where(status: ["pending", "paid"]) }
 
   def checkout_url
     # สำหรับ development ใช้ localhost, production ควรกำหนดใน config
@@ -95,46 +94,6 @@ class Order < ApplicationRecord
     self.class.where(id: id).delete_all
   end
 
-  def safe_destroy
-    # ลองลบแบบปกติก่อน ถ้าไม่ได้ใช้ force
-    begin
-      destroy
-    rescue FrozenError, ActiveRecord::RecordInvalid => e
-      Rails.logger.warn "Normal destroy failed: #{e.message}, using force delete"
-      force_delete!
-    end
-  end
-
-  def can_be_deleted?
-    # ตรวจสอบว่าสามารถลบได้หรือไม่
-    errors.clear
-
-    # ตรวจสอบ associations ที่อาจป้องกันการลบ
-    begin
-      valid?
-      return true
-    rescue => e
-      Rails.logger.error "Cannot delete order #{id}: #{e.message}"
-      return false
-    end
-  end
-
-  # เพิ่ม debug logging ถ้าต้องการ
-  def debug_frozen_state
-    Rails.logger.debug "Order #{id} frozen state: #{frozen?}" if Rails.env.development?
-  end
-
-  # Class methods สำหรับลบ
-  def self.force_delete_all
-    # ลบทั้งหมดโดยข้าม callbacks
-    delete_all
-  end
-
-  def self.safe_delete_by_ids(ids)
-    # ลบตาม IDs โดยข้าม frozen check
-    where(id: ids).delete_all
-  end
-
   def self.cleanup_expired_orders
     # ลบ orders ที่หมดอายุ
     expired_orders = where("checkout_token_expires_at < ?", Time.current)
@@ -142,23 +101,17 @@ class Order < ApplicationRecord
   end
 
   # Methods สำหรับการยกเลิก/ลบ Order อย่างปลอดภัย
-  def cancel_order!
-    # ยกเลิก order โดยเปลี่ยน status แทนการลบ
-    begin
-      update!(status: 'cancelled')
-    rescue FrozenError, ActiveRecord::RecordInvalid => e
-      # ถ้า update ไม่ได้ใช้ raw SQL
-      self.class.where(id: id).update_all(status: Order.statuses['cancelled'])
-    end
+  def cancellable?
+    status == "pending"
   end
 
   def soft_delete!
     # ลบแบบ soft delete โดยเปลี่ยน status
     begin
-      update!(status: 'deleted')
+      update!(status: "deleted")
     rescue FrozenError, ActiveRecord::RecordInvalid => e
       # ถ้า update ไม่ได้ใช้ raw SQL
-      self.class.where(id: id).update_all(status: Order.statuses['deleted'])
+      self.class.where(id: id).update_all(status: Order.statuses["deleted"])
     end
   end
 
@@ -172,34 +125,15 @@ class Order < ApplicationRecord
     end
   end
 
-  def safe_remove
-    # ลบอย่างปลอดภัย - ลองทุกวิธี
-    return cancel_order! if pending? || paid?  # ยกเลิกถ้ายังไม่ส่งของ
-    return soft_delete!  # หรือ soft delete
-  end
-
   private
 
   def generate_checkout_token
-    return if frozen? # ป้องกันการแก้ไข frozen object
     self.checkout_token = SecureRandom.urlsafe_base64(32) if checkout_token.blank?
     self.checkout_token_expires_at = 24.hours.from_now if checkout_token_expires_at.blank?
   end
 
-  def calculate_total_amount
-    return if frozen? # ป้องกันการแก้ไข frozen object
-    return if total_amount.present? # ไม่คำนวณใหม่ถ้ามีค่าแล้ว
-
-    if unit_price.present? && quantity.present?
-      self.total_amount = unit_price * quantity
-    end
-  end
-
   def set_unit_price_from_product
-    return if frozen? # ป้องกันการแก้ไข frozen object
-    return if unit_price.present? # ไม่เซ็ตใหม่ถ้ามีค่าแล้ว
-
-    if product.present?
+    if product.present? && unit_price.blank?
       self.unit_price = product.productPrice
     end
   end

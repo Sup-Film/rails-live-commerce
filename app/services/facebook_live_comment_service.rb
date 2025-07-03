@@ -24,6 +24,24 @@ class FacebookLiveCommentService
         },
       },
       {
+        "id" => "123456789010",
+        "message" => "CF 789",
+        "created_time" => "2023-10-01T12:00:00+0000",
+        "from" => {
+          "id" => "user123",
+          "name" => "ผู้ใช้ตัวอย่าง1",
+        },
+      },
+      {
+        "id" => "123456789011",
+        "message" => "CF 456",
+        "created_time" => "2023-10-01T12:00:00+0000",
+        "from" => {
+          "id" => "user123",
+          "name" => "ผู้ใช้ตัวอย่าง2",
+        },
+      },
+      {
         "id" => "0987654321",
         "message" => "สวัสดีครับ",
         "created_time" => "2023-10-01T12:05:00+0000",
@@ -105,8 +123,8 @@ class FacebookLiveCommentService
 
     # 3. ตรวจสอบว่า comment นี้ถูกประมวลผลแล้วหรือไม่
     existing_order = Order.find_by(
-      facebook_comment_id: data[:id],
       facebook_user_id: data[:from][:id],
+      order_number: order_number,
       user: @user,
     )
 
@@ -117,11 +135,18 @@ class FacebookLiveCommentService
 
     # 4. สร้าง Order
     begin
+      quantity = 1 # หรือกำหนดค่าเริ่มต้นตามที่ต้องการ
+      unit_price = product.productPrice
+      total_amount = unit_price * quantity
+
       order = Order.create!(
         # Required fields
         order_number: "CF#{order_number}",
         product: product,
         user: @user,
+        quantity: 1, # หรือกำหนดค่าเริ่มต้นตามที่ต้องการ
+        unit_price: unit_price,
+        total_amount: total_amount,
         facebook_comment_id: data[:id],
         facebook_user_id: data[:from][:id],
 
@@ -134,7 +159,7 @@ class FacebookLiveCommentService
       Rails.logger.info "Order created successfully: #{order.order_number}"
 
       # 5. ส่งลิงค์ checkout (optional)
-      send_checkout_link(order) if should_auto_reply?
+      # send_checkout_link(order)
 
       return order
     rescue ActiveRecord::RecordInvalid => e
@@ -148,83 +173,45 @@ class FacebookLiveCommentService
   end
 
   private
+#   def send_checkout_link(order)
+#     checkout_url = order.checkout_url
+#     @comment_id = order.facebook_comment_id # เก็บไว้สำหรับ fallback
 
-  def should_auto_reply?
-    # Auto reply
-    true
-  end
+#     reply_message = "✅ ขอบคุณที่สั่งซื้อ #{order.product.productName}
+# 💰 ราคา #{order.total_amount} บาท
+# 🔗 กรุณาคลิกลิงค์นี้เพื่อกรอกข้อมูลและชำระเงิน: #{checkout_url}
+# ⏰ ลิงค์หมดอายุใน 24 ชั่วโมง"
 
-  def send_checkout_link(order)
-    checkout_url = order.checkout_url
-    @comment_id = order.facebook_comment_id # เก็บไว้สำหรับ fallback
+#     Rails.logger.info "Sending private message to user #{order.facebook_user_id}: #{reply_message}"
 
-    reply_message = "✅ ขอบคุณที่สั่งซื้อ #{order.product.productName}
-💰 ราคา #{order.total_amount} บาท
-🔗 กรุณาคลิกลิงค์นี้เพื่อกรอกข้อมูลและชำระเงิน: #{checkout_url}
-⏰ ลิงค์หมดอายุใน 24 ชั่วโมง"
+#     # Send Facebook private message instead of public reply
+#     # send_private_message(order.facebook_user_id, reply_message)
+#   end
 
-    Rails.logger.info "Sending private message to user #{order.facebook_user_id}: #{reply_message}"
+  # def send_private_message(user_id, message)
+  #   return unless @access_token.present?
 
-    # Send Facebook private message instead of public reply
-    # send_private_message(order.facebook_user_id, reply_message)
-  end
+  #   begin
+  #     # ส่งข้อความส่วนตัวผ่าน Facebook Messenger API
+  #     response = HTTParty.post("https://graph.facebook.com/v18.0/me/messages",
+  #                              body: {
+  #                                recipient: { id: user_id },
+  #                                message: { text: message },
+  #                                access_token: @access_token,
+  #                              }.to_json,
+  #                              headers: {
+  #                                "Content-Type" => "application/json",
+  #                              })
 
-  def send_private_message(user_id, message)
-    return unless @access_token.present?
-
-    begin
-      # ส่งข้อความส่วนตัวผ่าน Facebook Messenger API
-      response = HTTParty.post("https://graph.facebook.com/v18.0/me/messages",
-                               body: {
-                                 recipient: { id: user_id },
-                                 message: { text: message },
-                                 access_token: @access_token,
-                               }.to_json,
-                               headers: {
-                                 "Content-Type" => "application/json",
-                               })
-
-      if response.success?
-        Rails.logger.info "Facebook private message sent successfully to user #{user_id}"
-      else
-        Rails.logger.error "Facebook private message failed: #{response.body}"
-
-        # Fallback: ถ้าส่ง private message ไม่ได้ ให้ส่งเป็น comment reply แทน
-        Rails.logger.info "Falling back to comment reply..."
-        post_facebook_reply_fallback(message)
-      end
-    rescue StandardError => e
-      Rails.logger.error "Error sending Facebook private message: #{e.message}"
-
-      # Fallback: ถ้าเกิด error ให้ส่งเป็น comment reply แทน
-      Rails.logger.info "Falling back to comment reply due to error..."
-      post_facebook_reply_fallback(message)
-    end
-  end
-
-  def post_facebook_reply_fallback(message)
-    # ใช้เป็น fallback เมื่อส่ง private message ไม่ได้
-    return unless @access_token.present?
-
-    # สร้างข้อความที่ปลอดภัยกว่าสำหรับ public comment
-    safe_message = "✅ ได้รับคำสั่งซื้อแล้ว! กรุณาตรวจสอบข้อความส่วนตัวเพื่อรับลิงค์ชำระเงิน 📩"
-
-    begin
-      response = HTTParty.post("https://graph.facebook.com/#{@comment_id}/comments",
-                               body: {
-                                 message: safe_message,
-                                 access_token: @access_token,
-                               })
-
-      if response.success?
-        Rails.logger.info "Facebook comment reply sent successfully (fallback)"
-      else
-        Rails.logger.error "Facebook comment reply failed (fallback): #{response.body}"
-      end
-    rescue StandardError => e
-      Rails.logger.error "Error sending Facebook comment reply (fallback): #{e.message}"
-    end
-  end
-
-  private
+  #     if response.success?
+  #       Rails.logger.info "Facebook private message sent successfully to user #{user_id}"
+  #     else
+  #       Rails.logger.error "Facebook private message failed: #{response.body}"
+  #     end
+  #   rescue StandardError => e
+  #     Rails.logger.error "Error sending Facebook private message: #{e.message}"
+  #     # Fallback: ถ้าเกิด error ให้ส่งเป็น comment reply แทน
+  #     Rails.logger.info "Falling back to comment reply due to error..."
+  #   end
+  # end
 end

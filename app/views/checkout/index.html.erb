@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>รายการคำสั่งซื้อ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container mt-4">
+      <h2>รายการคำสั่งซื้อที่รอดำเนินการ</h2>
+
+      <% if @orders.any? %>
+      <div class="row">
+        <% @orders.each do |order| %>
+        <div class="col-md-6 col-lg-4 mb-3">
+          <div class="card">
+            <div class="card-header">
+              <h5>คำสั่งซื้อ #<%= order.order_number %></h5>
+              <span class="badge bg-warning"><%= order.status.humanize %></span>
+            </div>
+            <div class="card-body">
+              <h6><%= order.product.productName %></h6>
+              <p class="text-muted"><%= order.product.productDetail %></p>
+              <p>
+                <strong>จำนวน:</strong>
+                <%= order.quantity %> ชิ้น
+              </p>
+              <p>
+                <strong>ราคารวม:</strong>
+                <%= number_to_currency(order.total_amount, unit: "฿", precision:
+                0) %>
+              </p>
+              <p>
+                <strong>สั่งโดย:</strong>
+                <%= order.facebook_user_name %>
+              </p>
+              <p>
+                <small class="text-muted">
+                  สร้างเมื่อ: <%= order.created_at.strftime("%d/%m/%Y %H:%M") %>
+                </small>
+              </p>
+
+              <div class="d-grid gap-2">
+                <%= link_to "ดูรายละเอียด", checkout_path(order.checkout_token),
+                class: "btn btn-primary btn-sm" %> <% if order.checkout_expired?
+                %>
+                <small class="text-danger">ลิงค์หมดอายุแล้ว</small>
+                <% else %>
+                <small class="text-success">
+                  หมดอายุใน <%=
+                  time_ago_in_words(order.checkout_token_expires_at) %>
+                </small>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <% end %>
+      </div>
+      <% else %>
+      <div class="text-center mt-5">
+        <h4>ไม่มีคำสั่งซื้อที่รอดำเนินการ</h4>
+        <p class="text-muted">
+          คำสั่งซื้อจะปรากฏที่นี่เมื่อมีการสั่งซื้อผ่าน Facebook Live
+        </p>
+      </div>
+      <% end %>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
