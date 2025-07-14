@@ -1,0 +1,159 @@
+<!-- Contact Page Header -->
+<div class="bg-gradient-to-br from-primary-50 to-indigo-100 rounded-2xl p-8 mb-12 text-center" data-aos="fade-down">
+  <h1 class="text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up" data-aos-delay="200">Contact Us</h1>
+  <p class="text-xl text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="400">
+    Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+  </p>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+  <!-- Contact Form -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8" data-aos="fade-right">
+    <h2 class="text-2xl font-bold text-gray-900 mb-6" data-aos="fade-up" data-aos-delay="200">Send us a Message</h2>
+    
+    <%= form_with url: contact_path, local: true, class: "space-y-6" do |form| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div data-aos="fade-up" data-aos-delay="300">
+          <%= form.label :first_name, "First Name", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :first_name, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" %>
+        </div>
+        
+        <div data-aos="fade-up" data-aos-delay="400">
+          <%= form.label :last_name, "Last Name", class: "block text-sm font-medium text-gray-700 mb-2" %>
+          <%= form.text_field :last_name, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" %>
+        </div>
+      </div>
+      
+      <div data-aos="fade-up" data-aos-delay="500">
+        <%= form.label :email, "Email Address", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.email_field :email, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" %>
+      </div>
+      
+      <div data-aos="fade-up" data-aos-delay="600">
+        <%= form.label :subject, "Subject", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_field :subject, required: true, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors" %>
+      </div>
+      
+      <div data-aos="fade-up" data-aos-delay="700">
+        <%= form.label :message, "Message", class: "block text-sm font-medium text-gray-700 mb-2" %>
+        <%= form.text_area :message, required: true, rows: 6, class: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors resize-none" %>
+      </div>
+      
+      <%= form.submit "Send Message", class: "w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer", data: { aos: "zoom-in", aos_delay: "800" } %>
+    <% end %>
+  </div>
+  
+  <!-- Contact Information -->
+  <div class="space-y-8" data-aos="fade-left">
+    <!-- Contact Details -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8" data-aos="fade-up" data-aos-delay="200">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Get in Touch</h3>
+      
+      <div class="space-y-4">
+        <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="300">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Email</h4>
+            <p class="text-gray-600">hello@fbconnect.com</p>
+            <p class="text-gray-600">support@fbconnect.com</p>
+          </div>
+        </div>
+        
+        <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="400">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Phone</h4>
+            <p class="text-gray-600">+1 (555) 123-4567</p>
+            <p class="text-gray-600">+1 (555) 987-6543</p>
+          </div>
+        </div>
+        
+        <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="500">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Address</h4>
+            <p class="text-gray-600">123 Tech Street</p>
+            <p class="text-gray-600">San Francisco, CA 94105</p>
+          </div>
+        </div>
+        
+        <div class="flex items-start space-x-4" data-aos="fade-up" data-aos-delay="600">
+          <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-semibold text-gray-900">Business Hours</h4>
+            <p class="text-gray-600">Monday - Friday: 9:00 AM - 6:00 PM PST</p>
+            <p class="text-gray-600">Saturday - Sunday: 10:00 AM - 4:00 PM PST</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- FAQ Section -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8" data-aos="fade-up" data-aos-delay="400">
+      <h3 class="text-2xl font-bold text-gray-900 mb-6">Frequently Asked Questions</h3>
+      
+      <div class="space-y-4">
+        <div data-aos="fade-up" data-aos-delay="500">
+          <h4 class="font-semibold text-gray-900 mb-2">How secure is my Facebook data?</h4>
+          <p class="text-gray-600 text-sm">We use OAuth 2.0 authentication and never store your Facebook password. All data is encrypted in transit and at rest.</p>
+        </div>
+        
+        <div data-aos="fade-up" data-aos-delay="600">
+          <h4 class="font-semibold text-gray-900 mb-2">How do I get started?</h4>
+          <p class="text-gray-600 text-sm">Simply click "Sign in with Facebook" on our homepage and authorize the connection. It takes less than a minute!</p>
+        </div>
+        
+        <div data-aos="fade-up" data-aos-delay="700">
+          <h4 class="font-semibold text-gray-900 mb-2">Is there a free trial?</h4>
+          <p class="text-gray-600 text-sm">Yes! You can use FbConnect for free to test all features. Premium plans are available for advanced needs.</p>
+        </div>
+        
+        <div data-aos="fade-up" data-aos-delay="800">
+          <h4 class="font-semibold text-gray-900 mb-2">Can I disconnect my account?</h4>
+          <p class="text-gray-600 text-sm">Absolutely. You can disconnect your Facebook account at any time from your profile settings.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA Section -->
+<div class="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-2xl p-8 text-center text-white mt-12" data-aos="fade-up">
+  <h2 class="text-3xl font-bold mb-4" data-aos="fade-up" data-aos-delay="200">Ready to Get Started?</h2>
+  <p class="text-primary-100 mb-6 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="300">
+    Don't wait! Connect your Facebook account today and start leveraging the power of social commerce.
+  </p>
+  
+  <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="zoom-in" data-aos-delay="400">
+    <%= link_to "/auth/facebook", class: "inline-flex items-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+      Start Free Trial
+    <% end %>
+    
+    <%= link_to products_path, class: "inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+      </svg>
+      View Products
+    <% end %>
+  </div>
+</div>

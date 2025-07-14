@@ -1,9 +1,10 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: %i[ show edit update destroy ]
+  before_action :require_login, only: %i[ new create edit update destroy index show ]
 
   # GET /products or /products.json
   def index
-    @products = Product.all
+    @products = current_user.products
   end
 
   # GET /products/1 or /products/1.json
@@ -58,13 +59,21 @@ class ProductsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_product
-      @product = Product.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def product_params
-      params.fetch(:product, {})
+  # Use callbacks to share common setup or constraints between actions.
+  def set_product
+    @product = current_user.products.find(params[:id])
+  end
+
+  # Only allow a list of trusted parameters through.
+  def product_params
+    params.fetch(:product, {})
+  end
+
+  # Method สำหรับตรวจสอบว่าผู้ใช้ล็อกอินอยู่หรือไม่
+  def require_login
+    unless user_signed_in?
+      redirect_to root_path, alert: "กรุณาเข้าสู่ระบบก่อนดำเนินการ."
     end
+  end
 end

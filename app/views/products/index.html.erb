@@ -1,14 +1,111 @@
-<p style="color: green"><%= notice %></p>
+<!-- Products Header -->
+<div class="bg-gradient-to-br from-primary-50 to-indigo-100 rounded-2xl p-8 mb-12 text-center" data-aos="fade-down">
+  <h1 class="text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up" data-aos-delay="200">Our Products</h1>
+  <p class="text-xl text-gray-600 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="400">
+    Discover our amazing collection of products designed to enhance your social commerce experience
+  </p>
+</div>
 
-<h1>Products</h1>
-
-<div id="products">
-  <% @products.each do |product| %>
-    <%= render product %>
-    <p>
-      <%= link_to "Show this product", product %>
-    </p>
+<!-- Add New Product Button -->
+<div class="flex justify-between items-center mb-8" data-aos="fade-up">
+  <h2 class="text-2xl font-semibold text-gray-900">Product Collection</h2>
+  <%= link_to new_product_path, class: "inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" do %>
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+    </svg>
+    Add New Product
   <% end %>
 </div>
 
-<%= link_to "New product", new_product_path %>
+<!-- Products Grid -->
+<% if @products.any? %>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="products">
+    <% @products.each_with_index do |product, index| %>
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="<%= index * 100 + 200 %>">
+        <!-- Product Image Placeholder -->
+        <div class="h-48 bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center">
+          <svg class="w-16 h-16 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+        </div>
+        
+        <!-- Product Content -->
+        <div class="p-6">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Product #<%= product.id %></h3>
+          <p class="text-gray-600 mb-4">
+            <% if product.respond_to?(:description) && product.description.present? %>
+              <%= truncate(product.description, length: 100) %>
+            <% else %>
+              A premium product designed to meet your needs with exceptional quality and value.
+            <% end %>
+          </p>
+          
+          <!-- Price -->
+          <div class="flex items-center justify-between mb-4">
+            <span class="text-2xl font-bold text-primary-600">
+              <% if product.respond_to?(:price) && product.price.present? %>
+                $<%= product.price %>
+              <% else %>
+                $99.99
+              <% end %>
+            </span>
+            <span class="text-sm text-gray-500">In Stock</span>
+          </div>
+          
+          <!-- Action Buttons -->
+          <div class="flex space-x-2">
+            <%= link_to product, class: "flex-1 bg-primary-600 hover:bg-primary-700 text-white text-center py-2 px-4 rounded-lg transition-colors" do %>
+              View Details
+            <% end %>
+            <%= link_to edit_product_path(product), class: "bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-3 rounded-lg transition-colors" do %>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+              </svg>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <!-- Empty State -->
+  <div class="text-center py-12" data-aos="fade-up">
+    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">No Products Yet</h3>
+    <p class="text-gray-600 mb-6 max-w-md mx-auto">
+      Start building your product catalog by adding your first product. It's quick and easy!
+    </p>
+    <%= link_to new_product_path, class: "inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Add Your First Product
+    <% end %>
+  </div>
+<% end %>
+
+<!-- CTA Section -->
+<div class="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-2xl p-8 text-center text-white mt-12" data-aos="fade-up">
+  <h2 class="text-3xl font-bold mb-4" data-aos="fade-up" data-aos-delay="200">Ready to Expand Your Catalog?</h2>
+  <p class="text-primary-100 mb-6 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="300">
+    Add more products to your collection and start selling through your Facebook integration
+  </p>
+  <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="zoom-in" data-aos-delay="400">
+    <%= link_to new_product_path, class: "inline-flex items-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+      </svg>
+      Add New Product
+    <% end %>
+    <%= link_to root_path, class: "inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+      </svg>
+      Back to Home
+    <% end %>
+  </div>
+</div>

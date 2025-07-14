@@ -133,6 +133,7 @@ GEM
     globalid (1.2.1)
       activesupport (>= 6.1)
     hashie (5.0.0)
+    htmlbeautifier (1.4.3)
     httparty (0.21.0)
       mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
@@ -359,6 +360,7 @@ DEPENDENCIES
   debug
   dotenv-rails
   error_highlight
+  htmlbeautifier
   httparty (~> 0.21.0)
   importmap-rails
   jbuilder
