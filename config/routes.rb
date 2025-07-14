@@ -4,6 +4,10 @@ Rails.application.routes.draw do
   # Root route
   root 'home#index'
 
+  # Static pages
+  get '/about', to: 'home#about', as: :about
+  get '/contact', to: 'home#contact', as: :contact
+
   # OmniAuth routes
   post "/auth/:provider/callback", to: "user_sessions#create"
   get "/auth/:provider/callback", to: "user_sessions#create"

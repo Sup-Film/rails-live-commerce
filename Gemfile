@@ -75,6 +75,7 @@ group :development do
   gem 'error_highlight'
   gem 'annotate'
   gem 'lograge'
+  gem 'htmlbeautifier'
 end
 
 group :test do

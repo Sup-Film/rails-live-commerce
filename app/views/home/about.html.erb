@@ -1,0 +1,151 @@
+<!-- About Page Header -->
+<div class="bg-gradient-to-br from-primary-50 to-indigo-100 rounded-2xl p-8 mb-12 text-center" data-aos="fade-down">
+  <h1 class="text-4xl font-bold text-gray-900 mb-4" data-aos="fade-up" data-aos-delay="200">About FbConnect</h1>
+  <p class="text-xl text-gray-600 max-w-3xl mx-auto" data-aos="fade-up" data-aos-delay="400">
+    Bridging the gap between social media and e-commerce with powerful Facebook integration
+  </p>
+</div>
+
+<!-- Mission Section -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
+  <div data-aos="fade-right">
+    <h2 class="text-3xl font-bold text-gray-900 mb-6" data-aos="fade-up" data-aos-delay="200">Our Mission</h2>
+    <p class="text-gray-600 mb-4" data-aos="fade-up" data-aos-delay="300">
+      FbConnect was created to help businesses leverage the power of Facebook's social platform 
+      for their e-commerce operations. We believe that social commerce is the future, and our 
+      platform makes it easy for anyone to get started.
+    </p>
+    <p class="text-gray-600 mb-6" data-aos="fade-up" data-aos-delay="400">
+      Our secure and user-friendly platform allows you to seamlessly integrate your Facebook 
+      account with powerful e-commerce tools, enabling you to reach your customers where they 
+      already spend their time.
+    </p>
+    
+    <div class="flex flex-wrap gap-4" data-aos="fade-up" data-aos-delay="500">
+      <%= link_to products_path, class: "inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-3 px-6 rounded-lg transition-colors" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+        </svg>
+        Explore Products
+      <% end %>
+      
+      <%= link_to contact_path, class: "inline-flex items-center border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-medium py-3 px-6 rounded-lg transition-colors" do %>
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        Get in Touch
+      <% end %>
+    </div>
+  </div>
+  
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8" data-aos="fade-left">
+    <h3 class="text-2xl font-bold text-gray-900 mb-6" data-aos="fade-up" data-aos-delay="200">Why Choose FbConnect?</h3>
+    <div class="space-y-4">
+      <div class="flex items-start space-x-3" data-aos="fade-up" data-aos-delay="300">
+        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">Secure Integration</h4>
+          <p class="text-gray-600">OAuth 2.0 authentication ensures your data is always protected</p>
+        </div>
+      </div>
+      
+      <div class="flex items-start space-x-3" data-aos="fade-up" data-aos-delay="400">
+        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">Easy Setup</h4>
+          <p class="text-gray-600">Get started in minutes with our simple one-click integration</p>
+        </div>
+      </div>
+      
+      <div class="flex items-start space-x-3" data-aos="fade-up" data-aos-delay="500">
+        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">Real-time Sync</h4>
+          <p class="text-gray-600">Stay updated with real-time data synchronization</p>
+        </div>
+      </div>
+      
+      <div class="flex items-start space-x-3" data-aos="fade-up" data-aos-delay="600">
+        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center mt-1">
+          <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+        </div>
+        <div>
+          <h4 class="font-semibold text-gray-900">24/7 Support</h4>
+          <p class="text-gray-600">Our team is here to help you succeed every step of the way</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Features Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+  <div class="text-center" data-aos="zoom-in" data-aos-delay="100">
+    <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Secure Platform</h3>
+    <p class="text-gray-600">Enterprise-grade security with OAuth 2.0 authentication and encrypted data transmission.</p>
+  </div>
+  
+  <div class="text-center" data-aos="zoom-in" data-aos-delay="200">
+    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Lightning Fast</h3>
+    <p class="text-gray-600">Optimized performance ensures your social commerce operations run smoothly and efficiently.</p>
+  </div>
+  
+  <div class="text-center" data-aos="zoom-in" data-aos-delay="300">
+    <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+      <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17v4a2 2 0 002 2h4M3 5l2 2m2 5l8 8m-8-8l8-8"></path>
+      </svg>
+    </div>
+    <h3 class="text-xl font-semibold text-gray-900 mb-2">Easy Integration</h3>
+    <p class="text-gray-600">Simple APIs and intuitive interface make integration a breeze for developers and users alike.</p>
+  </div>
+</div>
+
+<!-- Team Section -->
+<div class="bg-gray-50 rounded-2xl p-8 text-center" data-aos="fade-up">
+  <h2 class="text-3xl font-bold text-gray-900 mb-4" data-aos="fade-up" data-aos-delay="200">Built by Developers, for Developers</h2>
+  <p class="text-gray-600 max-w-2xl mx-auto mb-8" data-aos="fade-up" data-aos-delay="300">
+    Our team of experienced developers understands the challenges of social commerce integration. 
+    That's why we've built FbConnect to be both powerful and simple to use.
+  </p>
+  
+  <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="zoom-in" data-aos-delay="400">
+    <%= link_to "/auth/facebook", class: "inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+      </svg>
+      Get Started Now
+    <% end %>
+    
+    <%= link_to contact_path, class: "inline-flex items-center border-2 border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white font-semibold py-3 px-6 rounded-lg transition-colors" do %>
+      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+      </svg>
+      Contact Us
+    <% end %>
+  </div>
+</div>
