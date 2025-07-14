@@ -1,0 +1,68 @@
+<%# หน้าแจ้งลิงค์หมดอายุ %>
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card shadow">
+        <div class="card-header bg-danger text-white text-center">
+          <h5 class="mb-0">
+            <i class="fas fa-exclamation-triangle"></i>
+            ลิงค์หมดอายุ
+          </h5>
+        </div>
+        
+        <div class="card-body text-center">
+          <div class="mb-4">
+            <i class="fas fa-clock text-danger" style="font-size: 4rem;"></i>
+          </div>
+          
+          <h4 class="text-danger mb-3">เสียใจด้วย!</h4>
+          <p class="lead">ลิงค์สำหรับกรอกข้อมูลการสั่งซื้อนี้หมดอายุแล้ว</p>
+          
+          <div class="alert alert-warning" role="alert">
+            <i class="fas fa-info-circle"></i>
+            <strong>หมายเหตุ:</strong> ลิงค์การสั่งซื้อจะหมดอายุใน 24 ชั่วโมง
+            นับจากเวลาที่ได้รับลิงค์
+          </div>
+          
+          <div class="mb-4">
+            <h6>ต้องการสั่งซื้อสินค้าใหม่?</h6>
+            <p class="text-muted">
+              กรุณาติดต่อกลับไปที่เพจ Facebook หรือแอดมินเพื่อขอลิงค์ใหม่
+            </p>
+          </div>
+          
+          <div class="d-grid gap-2">
+            <%= link_to "กลับสู่หน้าหลัก", root_path, class: "btn btn-primary" %>
+            
+            <a href="#" class="btn btn-outline-success" onclick="window.open('https://m.me/yourpage', '_blank')">
+              <i class="fab fa-facebook-messenger"></i>
+              ติดต่อผ่าน Messenger
+            </a>
+            
+            <small class="text-muted mt-2">
+              หรือแสดงความคิดเห็นในไลฟ์สดใหม่เพื่อสั่งซื้อสินค้า
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fa-clock {
+    animation: pulse 2s infinite;
+  }
+  
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+</style>

@@ -1,11 +1,12 @@
 class FacebookLiveWebhookService
   # @param data [Hash] ข้อมูลที่ได้รับจาก Facebook Live webhook
-  attr_reader :data, :access_token
+  attr_reader :data, :access_token, :user
 
   # สร้างอินสแตนซ์ของ FacebookLiveWebhookService
-  def initialize(data, access_token = nil)
+  def initialize(data, access_token = nil, user)
     @data = data
     @access_token = access_token
+    @user = user
   end
 
   def process
@@ -48,16 +49,15 @@ class FacebookLiveWebhookService
 
   def handle_live_started(value)
     # FacebookLiveProcessor.new(value).process_live_start
-    FacebookLiveCommentService.new(value["id"], access_token).fetch_comments
+    FacebookLiveCommentService.new(value["id"], access_token, user).fetch_comments
   end
 
   def handle_live_ended(value)
     # FacebookLiveProcessor.new(value).process_live_end
-    FacebookLiveCommentService.new(value["id"], access_token).fetch_comments
+    FacebookLiveCommentService.new(value["id"], access_token, user).fetch_comments
   end
 
   def handle_live_to_vod(value)
-    FacebookLiveProcessor.new(value).process_live_to_vod
   end
 end
 
