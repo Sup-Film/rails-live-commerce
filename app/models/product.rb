@@ -23,6 +23,9 @@
 class Product < ApplicationRecord
   # เชื่อม Product กับ User (Product มี owner เป็น User คนหนึ่ง)
   belongs_to :user
+  
+  # เชื่อมกับ Active Storage สำหรับรูปภาพสินค้า
+  has_one_attached :product_image
 
   validates :productName, presence: true
   validates :productDetail, presence: true

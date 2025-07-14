@@ -13,7 +13,8 @@ class ProductsController < ApplicationController
 
   # GET /products/new
   def new
-    @product = Product.new
+    # @product = Product.new # ถ้าใช้แบบนี้จะไม่มี user_id จะ error!
+    @product = current_user.products.build
   end
 
   # GET /products/1/edit
@@ -22,11 +23,12 @@ class ProductsController < ApplicationController
 
   # POST /products or /products.json
   def create
-    @product = Product.new(product_params)
+    @product = current_user.products.build(product_params)
+    # @product = Product.new(product_params) # ถ้าใช้แบบนี้จะไม่มี user_id จะ error!
 
     respond_to do |format|
       if @product.save
-        format.html { redirect_to @product, notice: "Product was successfully created." }
+        format.html { redirect_to @product, notice: "สินค้าถูกสร้างเรียบร้อยแล้ว" }
         format.json { render :show, status: :created, location: @product }
       else
         format.html { render :new, status: :unprocessable_entity }
@@ -39,7 +41,7 @@ class ProductsController < ApplicationController
   def update
     respond_to do |format|
       if @product.update(product_params)
-        format.html { redirect_to @product, notice: "Product was successfully updated." }
+        format.html { redirect_to @product, notice: "แก้ไขสินค้าสำเร็จ" }
         format.json { render :show, status: :ok, location: @product }
       else
         format.html { render :edit, status: :unprocessable_entity }
@@ -53,7 +55,7 @@ class ProductsController < ApplicationController
     @product.destroy!
 
     respond_to do |format|
-      format.html { redirect_to products_path, status: :see_other, notice: "Product was successfully destroyed." }
+      format.html { redirect_to products_path, status: :see_other, notice: "ลบสินค้าสำเร็จ" }
       format.json { head :no_content }
     end
   end
@@ -67,7 +69,7 @@ class ProductsController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def product_params
-    params.fetch(:product, {})
+    params.require(:product).permit(:productName, :productDetail, :productPrice, :productCode, :image, :product_image)
   end
 
   # Method สำหรับตรวจสอบว่าผู้ใช้ล็อกอินอยู่หรือไม่

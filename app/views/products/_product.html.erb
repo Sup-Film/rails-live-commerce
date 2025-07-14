@@ -1,8 +1,143 @@
-<div id="<%= dom_id product %>">
-  <!-- Mockup Product Card -->
-  <div class="product-card">
-    <h2>Product Name</h2>
-    <p>Product Description</p>
-    
+<div id="<%= dom_id product %>" class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden max-w-4xl mx-auto" data-aos="fade-up">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Product Image -->
+    <div class="lg:h-96 h-64 bg-gradient-to-br from-primary-100 to-indigo-100 flex items-center justify-center overflow-hidden">
+      <% if product.product_image.attached? %>
+        <%= image_tag product.product_image, alt: product.productName, class: "w-full h-full object-cover" %>
+      <% elsif product.image.present? %>
+        <%= image_tag product.image, alt: product.productName, class: "w-full h-full object-cover" %>
+      <% else %>
+        <div class="text-center">
+          <svg class="w-20 h-20 text-primary-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+          </svg>
+          <p class="text-primary-500 text-lg">ไม่มีรูปภาพสินค้า</p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Product Details -->
+    <div class="p-8">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2"><%= product.productName %></h1>
+        <p class="text-lg text-gray-600">รหัสสินค้า: #<%= product.productCode %></p>
+      </div>
+
+      <div class="mb-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-3">รายละเอียดสินค้า</h3>
+        <p class="text-gray-700 leading-relaxed"><%= product.productDetail %></p>
+      </div>
+
+      <div class="mb-8">
+        <div class="flex items-center justify-between">
+          <span class="text-3xl font-bold text-primary-600">
+            ฿<%= number_with_delimiter(product.productPrice) %>
+          </span>
+          <span class="text-sm text-green-600 bg-green-100 px-3 py-1 rounded-full">✅ พร้อมจำหน่าย</span>
+        </div>
+      </div>
+
+      <!-- Owner Info -->
+      <div class="mb-6 p-4 bg-gray-50 rounded-xl">
+        <h4 class="text-sm font-semibold text-gray-700 mb-2">ผู้ขาย</h4>
+        <div class="flex items-center">
+          <% if product.user.present? %>
+            <div class="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mr-3">
+              <span class="text-primary-600 font-semibold text-sm">
+                <%= product.user.name.present? ? product.user.name.first.upcase : "U" %>
+              </span>
+            </div>
+            <span class="text-gray-700 font-medium">
+              <%= product.user.name.present? ? product.user.name : "ผู้ใช้ไม่ระบุชื่อ" %>
+            </span>
+          <% else %>
+            <span class="text-gray-500">ไม่มีข้อมูลผู้ขาย</span>
+          <% end %>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
+
+<!-- JavaScript Challenge สำหรับคุณ! -->
+<script>
+  // 🎯 Challenge 1: Image Zoom on Click
+  // TODO: เขียนฟังก์ชันให้รูปภาพซูมได้เมื่อคลิก
+  //
+  // แนวทาง:
+  // 1. เลือก element รูปภาพ
+  // 2. เพิ่ม event listener 'click'
+  // 3. สร้าง modal/overlay แสดงรูปขนาดใหญ่
+  // 4. เพิ่มปุ่มปิด modal
+
+  function initImageZoom() {
+    console.log('🖼️ Image zoom feature - Ready to implement!');
+
+    const productImage = document.querySelector('#<%= dom_id product %> img');
+    if (!productImage) return;
+    
+    productImage.style.cursor = 'pointer';
+    productImage.title = 'คลิกเพื่อดูรูปภาพขนาดใหญ่';
+    
+    productImage.addEventListener('click', function() {
+      // สร้าง modal container
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4';
+      modal.id = "zoom-modal";
+
+      // สร้าง content container
+      const modalContent = document.createElement('div');
+      modalContent.className = 'relative max-w-6xl max-h-full flex flex-col';
+      
+      // เพิ่ม header ข้อมูลสินค้า
+      const header = document.createElement('div');
+      header.className = 'text-white p-4 text-center';
+      header.innerHTML = `
+        <h3 class="text-xl font-bold mb-2"><%= product.productName %></h3>
+        <p class="text-gray-300">รหัส: #<%= product.productCode %> | ราคา: ฿<%= number_with_delimiter(product.productPrice) %></p>
+      `;
+      
+      // สร้าง image ใน modal
+      const zoomedImage = document.createElement('img');
+      zoomedImage.src = productImage.src;
+      zoomedImage.className = 'max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl';
+      zoomedImage.alt = '<%= product.productName %>';
+
+      // เพิ่ม close button
+      const closeButton = document.createElement('button');
+      closeButton.className = 'absolute top-4 right-4 text-white hover:text-red-400 text-3xl font-bold z-10 transition-colors';
+      closeButton.innerHTML = '×';
+      closeButton.onclick = () => {
+        modal.remove();
+      };
+      
+      modalContent.appendChild(header);
+      modalContent.appendChild(zoomedImage);
+      modal.appendChild(modalContent);
+      modal.appendChild(closeButton);
+      document.body.appendChild(modal);
+
+      // ปิด modal เมื่อคลิกพื้นหลัง
+      modal.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          modal.remove();
+        }
+      });
+      
+      // ปิดเมื่อกด ESC 
+      function handleEscapeKey(e) {
+        if (e.key === 'Escape') {
+          modal.remove();
+          document.removeEventListener('keydown', handleEscapeKey);
+        }
+      }
+    
+      document.addEventListener('keydown', handleEscapeKey);
+    });
+  }
+
+  // Initialize เมื่อหน้าโหลดเสร็จ
+  document.addEventListener('DOMContentLoaded', function() {
+    initImageZoom();
+  });
+</script>

@@ -76,10 +76,9 @@
                     <%= current_user.name %>
                   </span>
                 </div>
-                <%= link_to logout_path, method: :delete, 
-                    class: "bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors" do %>
-                  Logout
-                <% end %>
+                <%= button_to "Logout", logout_path, 
+                    method: :post,
+                    class: "bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors border-0 cursor-pointer" %>
               </div>
             <% else %>
               <%= link_to "/auth/facebook", 
@@ -196,10 +195,15 @@
       // Initialize AOS
       document.addEventListener('DOMContentLoaded', function() {
         AOS.init({
-          duration: 800,
+          duration: 650,
           easing: 'ease-in-out',
           once: true,
-          offset: 100
+          offset: 20,        // เปลี่ยนจาก 100 เป็น 20 (animation เริ่มเร็วขึ้น)
+          startEvent: 'DOMContentLoaded',
+          useClassNames: false,
+          disableMutationObserver: false,
+          debounceDelay: 50,
+          throttleDelay: 99
         });
       });
     </script>

@@ -14,7 +14,7 @@ Rails.application.routes.draw do
   get "/auth/failure", to: "user_sessions#failure"
 
   # Logout route
-  delete '/logout', to: 'user_sessions#destroy', as: :logout
+  post '/logout', to: 'user_sessions#destroy', as: :logout
   
   # Facebook API routes
   get '/facebook/profile', to: 'facebook#profile', as: :facebook_profile

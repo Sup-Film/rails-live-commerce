@@ -1,10 +1,38 @@
-<p style="color: green"><%= notice %></p>
-
+<!-- Back to Products -->
+<div class="mb-6" data-aos="fade-down">
+  <%= link_to products_path, class: "inline-flex items-center text-primary-600 hover:text-primary-700 font-medium" do %>
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+    </svg>
+    กลับไปยังรายการสินค้า
+  <% end %>
+</div>
+<!-- Product Details -->
 <%= render @product %>
 
-<div>
-  <%= link_to "Edit this product", edit_product_path(@product) %> |
-  <%= link_to "Back to products", products_path %>
-
-  <%= button_to "Destroy this product", @product, method: :delete %>
+<!-- Action Buttons -->
+<div class="flex flex-col sm:flex-row gap-4 mt-8 max-w-4xl mx-auto" data-aos="fade-up" data-aos-delay="200">
+  <% if user_signed_in? && current_user == @product.user %>
+    <%= link_to edit_product_path(@product), 
+          class: "flex-1 bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1" do %>
+      ✏️ แก้ไขสินค้า
+    <% end %>
+    
+    <%= button_to @product, method: :delete,
+          data: { 
+            confirm: "คุณแน่ใจหรือไม่ที่จะลบสินค้านี้? การลบไม่สามารถยกเลิกได้",
+            turbo_method: :delete
+          },
+          class: "flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1" do %>
+      🗑️ ลบสินค้า
+    <% end %>
+  <% else %>
+    <div class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
+      💬 สนใจสินค้า
+    </div>
+    
+    <div class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 text-center shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer">
+      📞 ติดต่อผู้ขาย
+    </div>
+  <% end %>
 </div>
