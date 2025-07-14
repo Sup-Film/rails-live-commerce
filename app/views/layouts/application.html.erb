@@ -35,7 +35,9 @@
   <body class="bg-gray-900 text-gray-100 min-h-screen">
     <header class="bg-gray-800 shadow-md">
       <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-        <h2 class="text-2xl font-bold text-primary-500">FbConnect</h2>
+        <%= link_to root_path, class: "text-white px-4 py-2 font-bold transition-colors flex items-center space-x-2" do %>
+          <h2 class="text-2xl font-bold">HOME</h2>
+        <% end %>
         <div class="flex items-center space-x-4">
           <% if defined?(current_user) && current_user %>
             <span class="text-sm text-gray-300"><%= current_user.name %></span>
