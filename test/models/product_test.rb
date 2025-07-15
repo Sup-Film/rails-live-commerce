@@ -3,6 +3,7 @@
 # Table name: products
 #
 #  id            :bigint           not null, primary key
+#  deleted_at    :datetime
 #  image         :string
 #  productCode   :integer
 #  productDetail :text
@@ -14,7 +15,8 @@
 #
 # Indexes
 #
-#  index_products_on_user_id  (user_id)
+#  index_products_on_deleted_at  (deleted_at)
+#  index_products_on_user_id     (user_id)
 #
 # Foreign Keys
 #

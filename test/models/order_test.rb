@@ -11,6 +11,7 @@
 #  customer_email            :string
 #  customer_name             :string
 #  customer_phone            :string
+#  deleted_at                :datetime
 #  facebook_user_name        :string
 #  order_number              :string           not null
 #  paid_at                   :datetime
@@ -31,6 +32,7 @@
 #  index_orders_on_checkout_token                   (checkout_token) UNIQUE
 #  index_orders_on_checkout_token_expires_at        (checkout_token_expires_at)
 #  index_orders_on_comment_and_users                (facebook_comment_id,facebook_user_id,user_id) UNIQUE
+#  index_orders_on_deleted_at                       (deleted_at)
 #  index_orders_on_facebook_user_id_and_created_at  (facebook_user_id,created_at)
 #  index_orders_on_order_number                     (order_number)
 #  index_orders_on_product_id                       (product_id)

@@ -4,7 +4,7 @@ class ProductsController < ApplicationController
 
   # GET /products or /products.json
   def index
-    @products = current_user.products
+    @products = current_user.products.active.order(created_at: :asc)
   end
 
   # GET /products/1 or /products/1.json
@@ -52,7 +52,7 @@ class ProductsController < ApplicationController
 
   # DELETE /products/1 or /products/1.json
   def destroy
-    @product.destroy!
+    @product.soft_delete!
 
     respond_to do |format|
       format.html { redirect_to products_path, status: :see_other, notice: "ลบสินค้าสำเร็จ" }

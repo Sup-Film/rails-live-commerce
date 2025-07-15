@@ -14,42 +14,11 @@ class FacebookLiveCommentService
 
     # Mock response data for testing
     comments = [
-      {
-        "id" => "1234567890",
-        "message" => "CF 7777",
-        "created_time" => "2023-10-01T12:00:00+0000",
-        "from" => {
-          "id" => "user123",
-          "name" => "ผู้ใช้ตัวอย่าง",
-        },
-      },
-      {
-        "id" => "123456789010",
-        "message" => "CF 2828",
-        "created_time" => "2023-10-01T12:00:00+0000",
-        "from" => {
-          "id" => "user123",
-          "name" => "ผู้ใช้ตัวอย่าง1",
-        },
-      },
-      {
-        "id" => "123456789011",
-        "message" => "CF 456",
-        "created_time" => "2023-10-01T12:00:00+0000",
-        "from" => {
-          "id" => "user123",
-          "name" => "ผู้ใช้ตัวอย่าง2",
-        },
-      },
-      {
-        "id" => "0987654321",
-        "message" => "สวัสดีครับ",
-        "created_time" => "2023-10-01T12:05:00+0000",
-        "from" => {
-          "id" => "user456",
-          "name" => "ผู้ใช้ตัวอย่าง",
-        },
-      },
+      { "id" => "1234567890", "message" => "CF 123", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง" } },
+      { "id" => "12345678900", "message" => "CF 456", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง" } },
+      { "id" => "123456789010", "message" => "CF 2828", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง1" } },
+      { "id" => "123456789011", "message" => "CF 456", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง2" } },
+      { "id" => "0987654321", "message" => "สวัสดีครับ", "created_time" => "2023-10-01T12:05:00+0000", "from" => { "id" => "user456", "name" => "ผู้ใช้ตัวอย่าง" } },
     ]
 
     # นำข้อมูลใน comment มาวนลูป และทำการสร้าง Hash ใหม่สำหรับแต่ละ comment
@@ -64,7 +33,6 @@ class FacebookLiveCommentService
         } : nil,
       }
 
-      # ตรวจจับ CF และแยกเลข order
       cf_result = detect_cf_order(comment_data)
     end
     # else
@@ -81,19 +49,21 @@ class FacebookLiveCommentService
 
     message = comment_data[:message]
 
-    Rails.logger.info "Data: #{JSON.pretty_generate(comment_data)}"
+    puts "\n====================="
+    puts "[FacebookLiveCommentService] ตรวจสอบคอมเมนต์:"
+    puts JSON.pretty_generate(comment_data)
+    puts "====================="
 
     # Pattern สำหรับจับ CF ตามด้วยตัวเลข เช่น "CF 123", "CF123", "cf 456"
     cf_pattern = /\b(cf|CF)\s*(\d+)\b/
 
     match = message.match(cf_pattern)
     if match
-      puts "Detected CF order:#{match[2]}"
-
+      puts "\e[32m[ตรวจพบ CF Order] -> Order Number: #{match[2]}\e[0m"
       order_number = match[2]
-      # ใช้ merge เพื่อรวมเอา order_number เข้าไปใน comment_data
       create_order(comment_data.merge(order_number: order_number))
     else
+      puts "\e[33m[ไม่พบ CF Order ในข้อความนี้]\e[0m"
       {
         detected: false,
         order_number: nil,
@@ -103,33 +73,36 @@ class FacebookLiveCommentService
   end
 
   def create_order(data)
-    Rails.logger.info "Creating order with data: #{data.inspect}"
+    puts "\n---------------------"
+    puts "[สร้างออเดอร์ใหม่] Data:"
+    puts JSON.pretty_generate(data)
+    puts "---------------------"
 
     # 1. หา Product จาก productCode
     order_number = data[:order_number]
-    product = Product.find_by(productCode: order_number.to_i)
+    product = Product.active.find_by(productCode: order_number.to_i)
 
     unless product
-      Rails.logger.warn "Product code #{order_number} not found"
+      puts "\e[31m[ไม่พบสินค้า] Product code: #{order_number}\e[0m"
       return nil
     end
 
     # 2. ใช้ Merchant (User) ที่ส่งมาใน constructor
     unless @user
-      Rails.logger.error "User (merchant) not provided"
+      puts "\e[31m[ไม่พบ User (merchant)]\e[0m"
       return nil
     end
-    Rails.logger.info "Using merchant: #{@user.name} (ID: #{@user.id})"
+    puts "\e[36m[ใช้ merchant] #{@user.name} (ID: #{@user.id})\e[0m"
 
     # 3. ตรวจสอบว่า comment นี้ถูกประมวลผลแล้วหรือไม่
-    existing_order = Order.find_by(
+    existing_order = Order.active_for_duplicate_check.find_by(
       facebook_user_id: data[:from][:id],
       order_number: order_number,
       user: @user,
     )
 
     if existing_order
-      Rails.logger.info "Comment #{data[:id]} มีออเดอร์อยู่แล้ว: #{existing_order.order_number}"
+      puts "\e[33m[พบออเดอร์เดิมแล้ว] Comment #{data[:id]} -> Order: #{existing_order.order_number}\e[0m"
       return existing_order
     end
 
@@ -156,37 +129,38 @@ class FacebookLiveCommentService
         comment_time: Time.parse(data[:created_time]),
       )
 
-      Rails.logger.info "Order created successfully: #{order.order_number}"
+      puts "\e[32m[สร้างออเดอร์สำเร็จ] Order: #{order.order_number}\e[0m"
 
       # 5. ส่งลิงค์ checkout (optional)
       # send_checkout_link(order)
 
       return order
     rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.error "Failed to create order: #{e.message}"
-      Rails.logger.error "Validation errors: #{e.record.errors.full_messages}"
+      puts "\e[31m[สร้างออเดอร์ไม่สำเร็จ] Validation failed: #{e.message}\e[0m"
+      puts "\e[31mValidation errors: #{e.record.errors.full_messages}\e[0m"
       return nil
     rescue StandardError => e
-      Rails.logger.error "Unexpected error creating order: #{e.message}"
+      puts "\e[31m[Unexpected error creating order] #{e.message}\e[0m"
       return nil
     end
   end
 
   private
-#   def send_checkout_link(order)
-#     checkout_url = order.checkout_url
-#     @comment_id = order.facebook_comment_id # เก็บไว้สำหรับ fallback
 
-#     reply_message = "✅ ขอบคุณที่สั่งซื้อ #{order.product.productName}
-# 💰 ราคา #{order.total_amount} บาท
-# 🔗 กรุณาคลิกลิงค์นี้เพื่อกรอกข้อมูลและชำระเงิน: #{checkout_url}
-# ⏰ ลิงค์หมดอายุใน 24 ชั่วโมง"
+  #   def send_checkout_link(order)
+  #     checkout_url = order.checkout_url
+  #     @comment_id = order.facebook_comment_id # เก็บไว้สำหรับ fallback
 
-#     Rails.logger.info "Sending private message to user #{order.facebook_user_id}: #{reply_message}"
+  #     reply_message = "✅ ขอบคุณที่สั่งซื้อ #{order.product.productName}
+  # 💰 ราคา #{order.total_amount} บาท
+  # 🔗 กรุณาคลิกลิงค์นี้เพื่อกรอกข้อมูลและชำระเงิน: #{checkout_url}
+  # ⏰ ลิงค์หมดอายุใน 24 ชั่วโมง"
 
-#     # Send Facebook private message instead of public reply
-#     # send_private_message(order.facebook_user_id, reply_message)
-#   end
+  #     Rails.logger.info "Sending private message to user #{order.facebook_user_id}: #{reply_message}"
+
+  #     # Send Facebook private message instead of public reply
+  #     # send_private_message(order.facebook_user_id, reply_message)
+  #   end
 
   # def send_private_message(user_id, message)
   #   return unless @access_token.present?

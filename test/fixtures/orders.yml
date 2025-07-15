@@ -11,6 +11,7 @@
 #  customer_email            :string
 #  customer_name             :string
 #  customer_phone            :string
+#  deleted_at                :datetime
 #  facebook_user_name        :string
 #  order_number              :string           not null
 #  paid_at                   :datetime
@@ -31,6 +32,7 @@
 #  index_orders_on_checkout_token                   (checkout_token) UNIQUE
 #  index_orders_on_checkout_token_expires_at        (checkout_token_expires_at)
 #  index_orders_on_comment_and_users                (facebook_comment_id,facebook_user_id,user_id) UNIQUE
+#  index_orders_on_deleted_at                       (deleted_at)
 #  index_orders_on_facebook_user_id_and_created_at  (facebook_user_id,created_at)
 #  index_orders_on_order_number                     (order_number)
 #  index_orders_on_product_id                       (product_id)
@@ -47,8 +49,50 @@
 # model remove the "{}" from the fixture names and add the columns immediately
 # below each fixture, per the syntax in the comments below
 #
-one: {}
-# column: value
-#
-two: {}
-# column: value
+# test/fixtures/orders.yml
+# อ้างอิง Product และ User จาก fixtures อื่นๆ
+# ตัวอย่าง: products(:one) และ users(:one)
+
+one:
+  order_number: "CF1001"
+  status: 0 # pending
+  product: one # อ้างอิงถึง product ที่ชื่อ 'one' ใน products.yml
+  quantity: 1
+  unit_price: 9.99
+  total_amount: 9.99
+  user: one # อ้างอิงถึง user ที่ชื่อ 'one' ใน users.yml
+  facebook_live_id: "live_id_test_1"
+  facebook_comment_id: "comment_id_one"
+  facebook_user_id: "fb_user_id_one"
+  facebook_user_name: "Facebook User One"
+  checkout_token: "token1"
+  comment_time: "2024-07-15 12:00:00"
+
+two:
+  order_number: "CF1002"
+  status: 0 # pending
+  product: two # อ้างอิงถึง product ที่ชื่อ 'two' ใน products.yml
+  quantity: 1
+  unit_price: 19.99
+  total_amount: 19.99
+  user: one # สามารถใช้ user คนเดิมได้ หรือสร้าง user ใหม่
+  facebook_live_id: "live_id_test_2"
+  facebook_comment_id: "comment_id_two"
+  facebook_user_id: "fb_user_id_two"
+  facebook_user_name: "Facebook User Two"
+  checkout_token: "token2"
+  comment_time: "2024-07-15 12:00:00"
+
+# เพิ่ม fixture สำหรับเคสที่จะทดสอบการสร้างออเดอร์ซ้ำ
+# สำหรับ test "should not create duplicate order for the same comment and user"
+existing_order_for_duplicate_test:
+  order_number: "CF7777" # ตรงกับที่ใช้ใน test case
+  status: 0 # pending
+  product: one # อ้างอิง product ที่ถูกใช้ใน test case
+  user: one # อ้างอิง user ที่ถูกใช้ใน test case
+  facebook_live_id: "mock_live_id_123"
+  facebook_comment_id: "existing_comment_id" # ตรงกับ comment_data[:id]
+  facebook_user_id: "facebook_user_1" # ตรงกับ comment_data[:from][:id]
+  facebook_user_name: "Facebook User One"
+  checkout_token: "token3"
+  comment_time: "2024-07-15 12:00:00"

@@ -11,6 +11,7 @@
 #  customer_email            :string
 #  customer_name             :string
 #  customer_phone            :string
+#  deleted_at                :datetime
 #  facebook_user_name        :string
 #  order_number              :string           not null
 #  paid_at                   :datetime
@@ -31,6 +32,7 @@
 #  index_orders_on_checkout_token                   (checkout_token) UNIQUE
 #  index_orders_on_checkout_token_expires_at        (checkout_token_expires_at)
 #  index_orders_on_comment_and_users                (facebook_comment_id,facebook_user_id,user_id) UNIQUE
+#  index_orders_on_deleted_at                       (deleted_at)
 #  index_orders_on_facebook_user_id_and_created_at  (facebook_user_id,created_at)
 #  index_orders_on_order_number                     (order_number)
 #  index_orders_on_product_id                       (product_id)
@@ -43,15 +45,13 @@
 #  fk_rails_...  (user_id => users.id)
 #
 class Order < ApplicationRecord
+  # Scope สำหรับเช็คซ้ำ order ที่ยังไม่ถูกลบและยังอยู่ในสถานะที่ถือว่ายัง active
+  scope :active_for_duplicate_check, -> { where(deleted_at: nil, status: [Order.statuses[:pending], Order.statuses[:paid]]) }
   belongs_to :product
   belongs_to :user
 
   validates :order_number, presence: true
   validates :facebook_comment_id, presence: true
-
-  # ป้องกันการสร้าง order ซ้ำจาก comment เดียวกันของ user เดียวกัน
-  validates :facebook_comment_id, uniqueness: { scope: [:facebook_user_id, :user_id],
-                                                message: "This comment has already been processed for this user" }
   validates :checkout_token, presence: true, uniqueness: true
   validates :unit_price, numericality: { greater_than: 0 }
   validates :quantity, numericality: { greater_than: 0 }
@@ -83,17 +83,6 @@ class Order < ApplicationRecord
     checkout_token_expires_at.present? && checkout_token_expires_at < Time.current
   end
 
-  # ช่วยในการ debug และ force delete
-  def force_delete!
-    # ลบโดยข้าม validations และ callbacks
-    delete
-  end
-
-  def force_destroy!
-    # ลบโดยข้าม frozen check และ validations
-    self.class.where(id: id).delete_all
-  end
-
   def self.cleanup_expired_orders
     # ลบ orders ที่หมดอายุ
     expired_orders = where("checkout_token_expires_at < ?", Time.current)
@@ -108,20 +97,10 @@ class Order < ApplicationRecord
   def soft_delete!
     # ลบแบบ soft delete โดยเปลี่ยน status
     begin
-      update!(status: "deleted")
+      update!(status: "deleted", deleted_at: Time.current)
     rescue FrozenError, ActiveRecord::RecordInvalid => e
       # ถ้า update ไม่ได้ใช้ raw SQL
-      self.class.where(id: id).update_all(status: Order.statuses["deleted"])
-    end
-  end
-
-  def hard_delete!
-    # ลบจริงๆ โดยข้าม frozen check
-    begin
-      destroy!
-    rescue FrozenError => e
-      # ใช้ raw SQL ลบโดยตรง
-      self.class.where(id: id).delete_all
+      self.class.where(id: id).update_all(status: Order.statuses["deleted"], deleted_at: Time.current)
     end
   end
 

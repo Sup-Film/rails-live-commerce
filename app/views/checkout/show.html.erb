@@ -12,7 +12,6 @@
       <div class="px-8 py-6">
         <!-- Product Information -->
         <div class="flex flex-col md:flex-row gap-6 mb-6 items-center">
-        <%= debug @order.product.product_image %>
           <% if @order.product.product_image.attached? %>
             <%= image_tag @order.product.product_image.variant(resize_to_limit: [300,200]), alt: @order.product.productName, class: "w-full md:w-56 h-40 object-cover rounded-xl border-2 border-gray-100" %>
           <% else %>

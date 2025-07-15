@@ -1,0 +1,17 @@
+one:
+  provider: "facebook"
+  uid: "some_facebook_uid_1"
+  name: "Test User One"
+  email: "test_user_one@example.com"
+  image: "http://example.com/image1.jpg"
+  oauth_token: "some_oauth_token_1"
+  oauth_expires_at: "2024-07-15 12:00:00"
+
+two:
+  provider: "facebook"
+  uid: "some_facebook_uid_2"
+  name: "Test User Two"
+  email: "test_user_two@example.com"
+  image: "http://example.com/image2.jpg"
+  oauth_token: "some_oauth_token_2"
+  oauth_expires_at: "2024-07-15 12:00:00"
