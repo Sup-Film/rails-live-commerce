@@ -16,7 +16,7 @@ class FacebookLiveCommentService
     comments = [
       {
         "id" => "1234567890",
-        "message" => "CF 123",
+        "message" => "CF 7777",
         "created_time" => "2023-10-01T12:00:00+0000",
         "from" => {
           "id" => "user123",
@@ -25,7 +25,7 @@ class FacebookLiveCommentService
       },
       {
         "id" => "123456789010",
-        "message" => "CF 789",
+        "message" => "CF 2828",
         "created_time" => "2023-10-01T12:00:00+0000",
         "from" => {
           "id" => "user123",

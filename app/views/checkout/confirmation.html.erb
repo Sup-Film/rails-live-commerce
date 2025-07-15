@@ -1,121 +1,89 @@
-<%# หน้ายืนยันข้อมูลก่อนชำระเงิน %>
-<div class="container mt-4">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow">
-        <div class="card-header bg-success text-white">
-          <h5 class="mb-0">
-            <i class="fas fa-check-circle"></i>
-            ยืนยันคำสั่งซื้อ
-          </h5>
+
+<section class="pt-8">
+  <div class="container mx-auto max-w-2xl px-4 py-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+      <div class="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-8 py-6 text-center">
+        <h2 class="text-2xl md:text-3xl font-bold mb-1 flex items-center justify-center gap-2">
+          <svg class="w-7 h-7 inline-block mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2l4-4" /></svg>
+          ยืนยันคำสั่งซื้อ
+        </h2>
+      </div>
+      <div class="px-8 py-6">
+        <!-- ข้อมูลสินค้า -->
+        <div class="mb-6">
+          <h6 class="text-gray-500 font-semibold mb-2">รายการสินค้า</h6>
+          <div class="bg-gray-50 rounded-xl p-4 flex flex-col md:flex-row gap-4 items-center">
+            <div class="flex-1">
+              <strong class="text-primary-700"><%= @order.product.productName %></strong><br>
+              <span class="text-xs text-gray-400">ราคา: <%= number_to_currency(@order.product.productPrice, unit: "฿", precision: 0) %> / ชิ้น</span>
+            </div>
+            <div class="flex flex-col items-end">
+              <span class="text-sm">จำนวน: <span class="inline-block bg-primary-100 text-primary-700 rounded-full px-3 py-1"><%= @order.quantity %></span> ชิ้น</span>
+              <span class="text-lg font-bold text-green-600">รวม: <%= number_to_currency(@order.total_amount, unit: "฿", precision: 0) %></span>
+            </div>
+          </div>
         </div>
-        
-        <div class="card-body">
-          <!-- ข้อมูลสินค้า -->
-          <div class="mb-4">
-            <h6 class="text-muted">รายการสินค้า</h6>
-            <div class="product-info bg-light p-3 rounded">
-              <div class="row">
-                <div class="col-md-6">
-                  <strong><%= @order.product.productName %></strong><br>
-                  <small class="text-muted">
-                    ราคา: ฿<%= number_with_delimiter(@order.product.productPrice) %> / ชิ้น
-                  </small>
-                </div>
-                <div class="col-md-6 text-end">
-                  <div>จำนวน: <span class="badge bg-primary"><%= @order.quantity %></span> ชิ้น</div>
-                  <div class="fs-5 fw-bold text-success">
-                    รวม: ฿<%= number_with_delimiter(@order.total_amount) %>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ข้อมูลลูกค้า -->
-          <div class="mb-4">
-            <h6 class="text-muted">ข้อมูลลูกค้า</h6>
-            <div class="customer-info bg-light p-3 rounded">
-              <div class="row">
-                <div class="col-md-6">
-                  <strong><%= @order.customer_name %></strong><br>
-                  <i class="fas fa-phone"></i> <%= @order.customer_phone %><br>
-                  <% if @order.customer_email.present? %>
-                    <i class="fas fa-envelope"></i> <%= @order.customer_email %><br>
-                  <% end %>
-                </div>
-                <div class="col-md-6">
-                  <strong>ที่อยู่จัดส่ง:</strong><br>
-                  <%= simple_format(@order.customer_address) %>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- สถานะคำสั่งซื้อ -->
-          <div class="mb-4">
-            <h6 class="text-muted">สถานะคำสั่งซื้อ</h6>
-            <div class="status-info">
-              <span class="badge bg-<%= @order.status == 'completed' ? 'success' : @order.status == 'pending' ? 'warning' : 'info' %> fs-6">
-                <i class="fas fa-<%= @order.status == 'completed' ? 'check' : @order.status == 'pending' ? 'clock' : 'info' %>"></i>
-                <%= @order.status.humanize %>
-              </span>
-              <small class="text-muted d-block mt-1">
-                วันที่สั่งซื้อ: <%= @order.created_at.strftime("%d/%m/%Y %H:%M") %>
-              </small>
-            </div>
-          </div>
-
-          <!-- ปุ่มต่างๆ -->
-          <div class="d-flex justify-content-between flex-wrap gap-2">
-            <div class="btn-group" role="group">
-              <% if @order.status == 'pending' %>
-                <%= link_to checkout_path(@order.checkout_token), class: "btn btn-outline-primary" do %>
-                  <i class="fas fa-edit"></i> แก้ไขข้อมูล
-                <% end %>
+        <!-- ข้อมูลลูกค้า -->
+        <div class="mb-6">
+          <h6 class="text-gray-500 font-semibold mb-2">ข้อมูลลูกค้า</h6>
+          <div class="bg-gray-50 rounded-xl p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <strong><%= @order.customer_name %></strong><br>
+              <span class="block text-xs text-gray-500"><%= @order.customer_phone %></span>
+              <% if @order.customer_email.present? %>
+                <span class="block text-xs text-gray-500"><%= @order.customer_email %></span>
               <% end %>
             </div>
-            
-            <div class="btn-group" role="group">
-              <% if @order.status == 'pending' %>
-                <%= button_to checkout_complete_path(@order.checkout_token), 
-                    method: :patch, class: "btn btn-success",
-                    data: { confirm: "ยืนยันการชำระเงินเสร็จสิ้น?" } do %>
-                  <i class="fas fa-check"></i> ชำระเงินเสร็จสิ้น
-                <% end %>
-                
-                <%= button_to checkout_cancel_path(@order.checkout_token), 
-                    method: :patch, class: "btn btn-outline-danger",
-                    data: { confirm: "ต้องการยกเลิกคำสั่งซื้อ?" } do %>
-                  <i class="fas fa-times"></i> ยกเลิก
-                <% end %>
-              <% end %>
+            <div>
+              <strong class="text-xs text-gray-500">ที่อยู่จัดส่ง:</strong><br>
+              <span class="block text-xs text-gray-700"><%= simple_format(@order.customer_address) %></span>
             </div>
           </div>
-          
-          <!-- แสดงสถานะ -->
-          <div class="mt-3 text-center">
-            <% if @order.status == 'completed' %>
-              <div class="alert alert-success">
-                <i class="fas fa-check-circle"></i>
-                <strong>คำสั่งซื้อเสร็จสิ้นแล้ว</strong><br>
-                <small>ขอบคุณที่ใช้บริการ</small>
-              </div>
-            <% elsif @order.status == 'cancelled' %>
-              <div class="alert alert-warning">
-                <i class="fas fa-times-circle"></i>
-                <strong>คำสั่งซื้อถูกยกเลิกแล้ว</strong>
-              </div>
-            <% elsif @order.status == 'pending' %>
-              <div class="alert alert-info">
-                <i class="fas fa-clock"></i>
-                <strong>รอดำเนินการชำระเงิน</strong><br>
-                <small>กรุณาชำระเงินและแจ้งเจ้าหน้าที่</small>
-              </div>
+        </div>
+        <!-- สถานะคำสั่งซื้อ -->
+        <div class="mb-6">
+          <h6 class="text-gray-500 font-semibold mb-2">สถานะคำสั่งซื้อ</h6>
+          <div>
+            <span class="inline-block rounded-full px-4 py-1 text-xs font-semibold
+              <%= @order.status == 'completed' ? 'bg-green-100 text-green-700' : @order.status == 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-700' %>">
+              <%= @order.status.humanize %>
+            </span>
+            <span class="block text-xs text-gray-400 mt-1">วันที่สั่งซื้อ: <%= @order.created_at.strftime("%d/%m/%Y %H:%M") %></span>
+          </div>
+        </div>
+        <!-- ปุ่มต่างๆ -->
+        <div class="flex flex-wrap gap-2 mb-6">
+          <% if @order.status == 'pending' %>
+            <%= link_to checkout_path(@order.checkout_token), class: "px-4 py-2 rounded-lg border border-primary-600 text-primary-700 hover:bg-primary-50 transition" do %>
+              แก้ไขข้อมูล
             <% end %>
-          </div>
+            <%= button_to checkout_complete_path(@order.checkout_token), method: :patch, class: "px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition", data: { confirm: "ยืนยันการชำระเงินเสร็จสิ้น?" } do %>
+              ชำระเงินเสร็จสิ้น
+            <% end %>
+            <%= button_to checkout_cancel_path(@order.checkout_token), method: :patch, class: "px-4 py-2 rounded-lg border border-red-600 text-red-700 hover:bg-red-50 transition", data: { confirm: "ต้องการยกเลิกคำสั่งซื้อ?" } do %>
+              ยกเลิก
+            <% end %>
+          <% end %>
+        </div>
+        <!-- แสดงสถานะ -->
+        <div class="text-center">
+          <% if @order.status == 'completed' %>
+            <div class="bg-green-100 text-green-700 rounded-lg px-4 py-3 inline-block">
+              <strong>คำสั่งซื้อเสร็จสิ้นแล้ว</strong><br>
+              <span class="text-xs">ขอบคุณที่ใช้บริการ</span>
+            </div>
+          <% elsif @order.status == 'cancelled' %>
+            <div class="bg-yellow-100 text-yellow-700 rounded-lg px-4 py-3 inline-block">
+              <strong>คำสั่งซื้อถูกยกเลิกแล้ว</strong>
+            </div>
+          <% elsif @order.status == 'pending' %>
+            <div class="bg-blue-100 text-blue-700 rounded-lg px-4 py-3 inline-block">
+              <strong>รอดำเนินการชำระเงิน</strong><br>
+              <span class="text-xs">กรุณาชำระเงินและแจ้งเจ้าหน้าที่</span>
+            </div>
+          <% end %>
         </div>
       </div>
     </div>
   </div>
-</div>
+</section>

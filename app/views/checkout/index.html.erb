@@ -1,74 +1,57 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>รายการคำสั่งซื้อ</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-      rel="stylesheet" />
-  </head>
-  <body>
-    <div class="container mt-4">
-      <h2>รายการคำสั่งซื้อที่รอดำเนินการ</h2>
+<section class="pt-8">
+  <div class="container mx-auto max-w-6xl px-4 py-8">
+    <h2 class="text-2xl md:text-3xl font-bold text-primary-700 mb-8 text-center">รายการคำสั่งซื้อที่รอดำเนินการ</h2>
 
-      <% if @orders.any? %>
-      <div class="row">
+    <% if @orders.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <% @orders.each do |order| %>
-        <div class="col-md-6 col-lg-4 mb-3">
-          <div class="card">
-            <div class="card-header">
-              <h5>คำสั่งซื้อ #<%= order.order_number %></h5>
-              <span class="badge bg-warning"><%= order.status.humanize %></span>
+          <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-primary-50 to-indigo-50">
+              <div>
+                <h3 class="text-lg font-bold text-gray-900 mb-1">คำสั่งซื้อ #<%= order.order_number %></h3>
+                <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold
+                  <%= order.status == 'pending' ? 'bg-yellow-100 text-yellow-800' : order.status == 'completed' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600' %>">
+                  <%= order.status.humanize %>
+                </span>
+              </div>
+              <div class="text-right">
+                <span class="text-xs text-gray-400 block">สร้างเมื่อ</span>
+                <span class="text-xs text-gray-600"><%= order.created_at.strftime("%d/%m/%Y %H:%M") %></span>
+              </div>
             </div>
-            <div class="card-body">
-              <h6><%= order.product.productName %></h6>
-              <p class="text-muted"><%= order.product.productDetail %></p>
-              <p>
-                <strong>จำนวน:</strong>
-                <%= order.quantity %> ชิ้น
-              </p>
-              <p>
-                <strong>ราคารวม:</strong>
-                <%= number_to_currency(order.total_amount, unit: "฿", precision:
-                0) %>
-              </p>
-              <p>
-                <strong>สั่งโดย:</strong>
-                <%= order.facebook_user_name %>
-              </p>
-              <p>
-                <small class="text-muted">
-                  สร้างเมื่อ: <%= order.created_at.strftime("%d/%m/%Y %H:%M") %>
-                </small>
-              </p>
-
-              <div class="d-grid gap-2">
+            <div class="p-6 flex-1 flex flex-col">
+              <div class="mb-4">
+                <h4 class="text-base font-semibold text-primary-700 mb-1"><%= order.product.productName %></h4>
+                <p class="text-gray-500 text-sm mb-2"><%= order.product.productDetail %></p>
+                <div class="flex flex-wrap gap-4 text-sm">
+                  <span><strong>จำนวน:</strong> <%= order.quantity %> ชิ้น</span>
+                  <span><strong>ราคารวม:</strong> <%= number_to_currency(order.total_amount, unit: "฿", precision: 0) %></span>
+                </div>
+              </div>
+              <div class="mb-4">
+                <span class="block text-sm text-gray-700"><strong>สั่งโดย:</strong> <%= order.facebook_user_name %></span>
+              </div>
+              <div class="mt-auto">
                 <%= link_to "ดูรายละเอียด", checkout_path(order.checkout_token),
-                class: "btn btn-primary btn-sm" %> <% if order.checkout_expired?
-                %>
-                <small class="text-danger">ลิงค์หมดอายุแล้ว</small>
+                  class: "block w-full text-center bg-primary-600 hover:bg-primary-700 text-white font-semibold py-2 rounded-lg transition-colors mb-2" %>
+                <% if order.checkout_expired? %>
+                  <span class="block text-xs text-red-500 text-center">ลิงค์หมดอายุแล้ว</span>
                 <% else %>
-                <small class="text-success">
-                  หมดอายุใน <%=
-                  time_ago_in_words(order.checkout_token_expires_at) %>
-                </small>
+                  <span class="block text-xs text-green-600 text-center">หมดอายุใน <%= time_ago_in_words(order.checkout_token_expires_at) %></span>
                 <% end %>
               </div>
             </div>
           </div>
-        </div>
         <% end %>
       </div>
-      <% else %>
-      <div class="text-center mt-5">
-        <h4>ไม่มีคำสั่งซื้อที่รอดำเนินการ</h4>
-        <p class="text-muted">
-          คำสั่งซื้อจะปรากฏที่นี่เมื่อมีการสั่งซื้อผ่าน Facebook Live
-        </p>
+    <% else %>
+      <div class="flex flex-col items-center justify-center py-16">
+        <svg class="w-16 h-16 text-primary-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2a4 4 0 014-4h3m4 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h4 class="text-xl font-semibold text-gray-700 mb-2">ไม่มีคำสั่งซื้อที่รอดำเนินการ</h4>
+        <p class="text-gray-500">คำสั่งซื้อจะปรากฏที่นี่เมื่อมีการสั่งซื้อผ่าน Facebook Live</p>
       </div>
-      <% end %>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-</html>
+    <% end %>
+  </div>
+</section>

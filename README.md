@@ -127,6 +127,29 @@ config/
 - Secure file uploads
 - OmniAuth error handling
 
+## 📱 Screenshots
+
+[Add screenshots of your application here]
+
+## 🚀 Deployment
+
+### Heroku Deployment
+```bash
+# Add Heroku remote
+heroku git:remote -a your-app-name
+
+# Set environment variables
+heroku config:set FACEBOOK_APP_ID=your_app_id
+heroku config:set FACEBOOK_APP_SECRET=your_app_secret
+heroku config:set FACEBOOK_CALLBACK_URL=https://your-app.herokuapp.com/auth/facebook/callback
+
+# Deploy
+git push heroku main
+
+# Run migrations
+heroku run rails db:migrate
+```
+
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

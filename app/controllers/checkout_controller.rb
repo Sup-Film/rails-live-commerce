@@ -42,18 +42,18 @@ class CheckoutController < ApplicationController
   def complete
     # ทำให้คำสั่งซื้อเสร็จสิ้น
     if OrderService.complete_order(@order)
-      redirect_to redirect_with_success("คำสั่งซื้อเสร็จสิ้นเรียบร้อยแล้ว")
+      redirect_with_success("คำสั่งซื้อเสร็จสิ้นเรียบร้อยแล้ว")
     else
-      redirect_to redirect_with_error("ไม่สามารถทำให้คำสั่งซื้อเสร็จสิ้นได้")
+      redirect_with_error("ไม่สามารถทำให้คำสั่งซื้อเสร็จสิ้นได้")
     end
   end
 
   def cancel
     # ยกเลิกคำสั่งซื้อ
     if OrderService.cancel_order(@order)
-      redirect_to redirect_with_success("ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว")
+      redirect_with_success("ยกเลิกคำสั่งซื้อเรียบร้อยแล้ว"); return
     else
-      redirect_to redirect_with_error("ไม่สามารถยกเลิกคำสั่งซื้อได้")
+      redirect_with_error("ไม่สามารถยกเลิกคำสั่งซื้อได้"); return
     end
   end
 
