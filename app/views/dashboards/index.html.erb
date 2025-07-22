@@ -1,0 +1,32 @@
+<p style="color: green"><%= notice %></p>
+
+<h1>Dashboards</h1>
+
+<%= debug @orders %>
+
+<table class="table-auto w-full border mt-4">
+  <thead>
+    <tr>
+      <th class="border px-4 py-2">Order Number</th>
+      <th class="border px-4 py-2">Product</th>
+      <th class="border px-4 py-2">Customer</th>
+      <th class="border px-4 py-2">Quantity</th>
+      <th class="border px-4 py-2">Total</th>
+      <th class="border px-4 py-2">Created At</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @orders.each do |order| %>
+      <tr>
+        <td class="border px-4 py-2"><%= order.order_number %></td>
+        <td class="border px-4 py-2"><%= order.product&.productName %></td>
+        <td class="border px-4 py-2"><%= order.facebook_user_name.presence || order.facebook_user_id %></td>
+        <td class="border px-4 py-2"><%= order.quantity %></td>
+        <td class="border px-4 py-2"><%= number_to_currency(order.total_amount) %></td>
+        <td class="border px-4 py-2"><%= l(order.created_at, format: :short) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= link_to "New dashboard", new_dashboard_path %>

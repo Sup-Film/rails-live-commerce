@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get '/dashboard', to: 'dashboards#show', as: :dashboard
+  resources :dashboards
   # Products routes
   resources :products
   # Root route

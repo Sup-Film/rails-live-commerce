@@ -56,6 +56,11 @@
             <%= link_to products_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
               Products
             <% end %>
+            <% if user_signed_in? %>
+              <%= link_to dashboard_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
+                Dashboard
+              <% end %>
+            <% end %>
             <%= link_to about_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
               About
             <% end %>
@@ -107,6 +112,11 @@
             <% end %>
             <%= link_to products_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
               Products
+            <% end %>
+            <% if user_signed_in? %>
+              <%= link_to dashboard_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
+                Dashboard
+              <% end %>
             <% end %>
             <%= link_to about_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
               About
