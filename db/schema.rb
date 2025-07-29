@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_07_15_075726) do
+ActiveRecord::Schema[7.1].define(version: 2025_07_29_083133) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -66,6 +66,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_07_15_075726) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "deleted_at"
+    t.string "tracking"
+    t.string "ref"
     t.index ["checkout_token"], name: "index_orders_on_checkout_token", unique: true
     t.index ["checkout_token_expires_at"], name: "index_orders_on_checkout_token_expires_at"
     t.index ["deleted_at"], name: "index_orders_on_deleted_at"

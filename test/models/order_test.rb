@@ -16,8 +16,10 @@
 #  order_number              :string           not null
 #  paid_at                   :datetime
 #  quantity                  :integer          default(1)
+#  ref                       :string
 #  status                    :integer          default("pending")
 #  total_amount              :decimal(10, 2)
+#  tracking                  :string
 #  unit_price                :decimal(10, 2)
 #  created_at                :datetime         not null
 #  updated_at                :datetime         not null

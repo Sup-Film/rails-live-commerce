@@ -14,12 +14,15 @@ class FacebookLiveCommentService
 
     # Mock response data for testing
     comments = [
-      { "id" => "1234567890", "message" => "CF 123", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง" } },
-      { "id" => "12345678900", "message" => "CF 456", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง" } },
-      { "id" => "123456789010", "message" => "CF 2828", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง1" } },
-      { "id" => "123456789011", "message" => "CF 456", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user123", "name" => "ผู้ใช้ตัวอย่าง2" } },
-      { "id" => "0987654321", "message" => "สวัสดีครับ", "created_time" => "2023-10-01T12:05:00+0000", "from" => { "id" => "user456", "name" => "ผู้ใช้ตัวอย่าง" } },
-    ]
+      # สร้าง comment สำหรับ productCode 1
+      *Array.new(5) { |i| { "id" => "c1_#{i}", "message" => "CF 1", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user#{i}", "name" => "User #{i}" } } },
+      # สร้าง comment สำหรับ productCode 2
+      *Array.new(5) { |i| { "id" => "c2_#{i}", "message" => "CF 2", "created_time" => "2023-10-01T12:01:00+0000", "from" => { "id" => "user#{i + 5}", "name" => "User #{i + 5}" } } },
+      # สร้าง comment สำหรับ productCode 3
+      *Array.new(5) { |i| { "id" => "c3_#{i}", "message" => "CF 3", "created_time" => "2023-10-01T12:02:00+0000", "from" => { "id" => "user#{i + 10}", "name" => "User #{i + 10}" } } },
+      # สร้าง comment สำหรับ productCode 12345
+      *Array.new(5) { |i| { "id" => "c12345_#{i}", "message" => "CF 12345", "created_time" => "2023-10-01T12:03:00+0000", "from" => { "id" => "user#{i + 15}", "name" => "User #{i + 15}" } } },
+    ].flatten
 
     # นำข้อมูลใน comment มาวนลูป และทำการสร้าง Hash ใหม่สำหรับแต่ละ comment
     comments.each do |comment|
@@ -33,7 +36,7 @@ class FacebookLiveCommentService
         } : nil,
       }
 
-      cf_result = detect_cf_order(comment_data)
+      cf_result = create_order(comment_data)
     end
     # else
     #   Rails.logger.error "Failed to fetch comments for Facebook Live ID: #{@live_id}, Response: #{response.body}"
@@ -44,60 +47,36 @@ class FacebookLiveCommentService
     []
   end
 
-  def detect_cf_order(comment_data)
-    return nil if comment_data.nil?
-
-    message = comment_data[:message]
-
-    puts "\n====================="
-    puts "[FacebookLiveCommentService] ตรวจสอบคอมเมนต์:"
-    puts JSON.pretty_generate(comment_data)
-    puts "====================="
-
-    # Pattern สำหรับจับ CF ตามด้วยตัวเลข เช่น "CF 123", "CF123", "cf 456"
-    cf_pattern = /\b(cf|CF)\s*(\d+)\b/
-
-    match = message.match(cf_pattern)
-    if match
-      puts "\e[32m[ตรวจพบ CF Order] -> Order Number: #{match[2]}\e[0m"
-      order_number = match[2]
-      create_order(comment_data.merge(order_number: order_number))
-    else
-      puts "\e[33m[ไม่พบ CF Order ในข้อความนี้]\e[0m"
-      {
-        detected: false,
-        order_number: nil,
-        original_message: message,
-      }
-    end
-  end
-
   def create_order(data)
     puts "\n---------------------"
     puts "[สร้างออเดอร์ใหม่] Data:"
     puts JSON.pretty_generate(data)
     puts "---------------------"
 
-    # 1. หา Product จาก productCode
-    order_number = data[:order_number]
-    product = Product.active.find_by(productCode: order_number.to_i)
+    message = data[:message].to_s
+    product_codes = Product.active.pluck(:productCode).map(&:to_s)
+    found_code = product_codes.find { |code| message.include?(code) }
 
-    unless product
-      puts "\e[31m[ไม่พบสินค้า] Product code: #{order_number}\e[0m"
+    unless found_code
+      puts "\e[31m[ไม่พบสินค้าในข้อความ] Product codes: #{product_codes.join(", ")}\e[0m"
       return nil
     end
 
-    # 2. ใช้ Merchant (User) ที่ส่งมาใน constructor
+    product = Product.active.find_by(productCode: found_code.to_i)
+    unless product
+      puts "\e[31m[ไม่พบสินค้า] Product code: #{found_code}\e[0m"
+      return nil
+    end
+
     unless @user
       puts "\e[31m[ไม่พบ User (merchant)]\e[0m"
       return nil
     end
     puts "\e[36m[ใช้ merchant] #{@user.name} (ID: #{@user.id})\e[0m"
 
-    # 3. ตรวจสอบว่า comment นี้ถูกประมวลผลแล้วหรือไม่
     existing_order = Order.active_for_duplicate_check.find_by(
       facebook_user_id: data[:from][:id],
-      order_number: order_number,
+      order_number: found_code,
       user: @user,
     )
 
@@ -106,34 +85,26 @@ class FacebookLiveCommentService
       return existing_order
     end
 
-    # 4. สร้าง Order
     begin
-      quantity = 1 # หรือกำหนดค่าเริ่มต้นตามที่ต้องการ
+      quantity = 1
       unit_price = product.productPrice
       total_amount = unit_price * quantity
 
       order = Order.create!(
-        # Required fields
-        order_number: "CF#{order_number}",
+        order_number: found_code,
         product: product,
         user: @user,
-        quantity: 1, # หรือกำหนดค่าเริ่มต้นตามที่ต้องการ
+        quantity: quantity,
         unit_price: unit_price,
         total_amount: total_amount,
         facebook_comment_id: data[:id],
         facebook_user_id: data[:from][:id],
-
-        # Optional fields
         facebook_user_name: data[:from][:name],
         facebook_live_id: @live_id,
         comment_time: Time.parse(data[:created_time]),
       )
 
       puts "\e[32m[สร้างออเดอร์สำเร็จ] Order: #{order.order_number}\e[0m"
-
-      # 5. ส่งลิงค์ checkout (optional)
-      # send_checkout_link(order)
-
       return order
     rescue ActiveRecord::RecordInvalid => e
       puts "\e[31m[สร้างออเดอร์ไม่สำเร็จ] Validation failed: #{e.message}\e[0m"

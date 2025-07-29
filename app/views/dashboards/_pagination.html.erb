@@ -1,0 +1,30 @@
+<!-- Pagination controls -->
+<div class="mt-6 flex justify-center">
+  <% if @orders.total_pages > 1 %>
+    <nav class="inline-flex gap-2" aria-label="Pagination">
+      <%# Previous page %>
+      <% if @orders.prev_page %>
+        <%= link_to '«', url_for(page: @orders.prev_page), class: 'px-3 py-2 rounded-lg bg-white border shadow hover:bg-primary-100 text-primary-700 transition' %>
+      <% else %>
+        <span class="px-3 py-2 rounded-lg bg-gray-100 border text-gray-400 cursor-not-allowed">«</span>
+      <% end %>
+
+      <%# Page numbers %>
+      <% (@orders.current_page-2..@orders.current_page+2).each do |page| %>
+        <% next if page < 1 || page > @orders.total_pages %>
+        <% if page == @orders.current_page %>
+          <span class="px-3 py-2 rounded-lg bg-primary-600 text-white font-bold shadow"> <%= page %> </span>
+        <% else %>
+          <%= link_to page, url_for(page: page), class: 'px-3 py-2 rounded-lg bg-white border shadow hover:bg-primary-100 text-primary-700 transition' %>
+        <% end %>
+      <% end %>
+
+      <%# Next page %>
+      <% if @orders.next_page %>
+        <%= link_to '»', url_for(page: @orders.next_page), class: 'px-3 py-2 rounded-lg bg-white border shadow hover:bg-primary-100 text-primary-700 transition' %>
+      <% else %>
+        <span class="px-3 py-2 rounded-lg bg-gray-100 border text-gray-400 cursor-not-allowed">»</span>
+      <% end %>
+    </nav>
+  <% end %>
+</div>

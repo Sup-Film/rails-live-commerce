@@ -16,8 +16,10 @@
 #  order_number              :string           not null
 #  paid_at                   :datetime
 #  quantity                  :integer          default(1)
+#  ref                       :string
 #  status                    :integer          default("pending")
 #  total_amount              :decimal(10, 2)
+#  tracking                  :string
 #  unit_price                :decimal(10, 2)
 #  created_at                :datetime         not null
 #  updated_at                :datetime         not null
@@ -75,7 +77,7 @@ class Order < ApplicationRecord
 
   def checkout_url
     # สำหรับ development ใช้ localhost, production ควรกำหนดใน config
-    base_url = Rails.env.production? ? "https://your-domain.com" : "http://localhost:3000"
+    base_url = Rails.env.production? ? "https://5ed07b758d8c.ngrok-free.app" : "http://localhost:3000"
     "#{base_url}/checkout/#{checkout_token}"
   end
 

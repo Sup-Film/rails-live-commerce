@@ -3,7 +3,7 @@ class DashboardsController < ApplicationController
 
   # GET /dashboard
   def show
-    @orders = current_user.orders.order(created_at: :desc)
+    @orders = current_user.orders.order(created_at: :desc).page(params[:page]).per(10)
   end
 
   private
