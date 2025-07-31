@@ -1,6 +1,8 @@
 class ProductsController < ApplicationController
+  include SubscriptionManagement
   before_action :set_product, only: %i[ show edit update destroy ]
   before_action :require_login, only: %i[ new create edit update destroy index show ]
+  before_action :check_active_subscription
 
   # GET /products or /products.json
   def index

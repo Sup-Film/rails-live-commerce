@@ -10,6 +10,7 @@
 #  oauth_token      :string
 #  password_digest  :string
 #  provider         :string
+#  role             :integer          default(0), not null
 #  uid              :string
 #  created_at       :datetime         not null
 #  updated_at       :datetime         not null
@@ -21,8 +22,15 @@
 class User < ApplicationRecord
   has_secure_password
 
+  # Enums
+  enum role: { user: 0, admin: 1 }
+
+  # Relations
   has_many :products, dependent: :destroy
   has_many :orders, dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
+
+  # Validations
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 6 }, if: -> { password.present? }

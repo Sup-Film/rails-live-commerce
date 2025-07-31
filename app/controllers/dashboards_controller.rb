@@ -1,5 +1,7 @@
 class DashboardsController < ApplicationController
+  include SubscriptionManagement
   before_action :require_login
+  before_action :check_active_subscription
 
   # GET /dashboard
   def show

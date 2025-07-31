@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
-  get 'users/new'
-  get 'users/create'
+  get "users/new"
+  get "users/create"
   get "/dashboard", to: "dashboards#show", as: :dashboard
   resources :dashboards
   # Products routes
@@ -13,13 +13,16 @@ Rails.application.routes.draw do
   resources :users, only: [:create]
 
   # Login and logout routes
-  get 'login', to: 'user_sessions#new'
-  post 'login', to: 'user_sessions#create'
-  delete 'logout', to: 'user_sessions#destroy'
+  get "login", to: "user_sessions#new"
+  post "login", to: "user_sessions#create"
+  delete "logout", to: "user_sessions#destroy"
 
   # Static pages
   get "/about", to: "home#about", as: :about
   get "/contact", to: "home#contact", as: :contact
+
+  # Subscription management
+  get "subscription_required", to: "pages#subscription_required"
 
   # OmniAuth routes
   post "/auth/:provider/callback", to: "user_sessions#create"
