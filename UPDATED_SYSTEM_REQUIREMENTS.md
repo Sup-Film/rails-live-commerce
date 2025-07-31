@@ -6,8 +6,8 @@
 ## 📋 System Requirements Summary
 
 ### 1. บัญชี (Subscription System)
-- **Payment Model**: จ่ายครั้งเดียว (One-time payment)
-- **Access**: Lifetime access หลังจากชำระเงินแล้ว
+- **Payment Model**: จ่ายรายเดือน (Monthly recurring payment)
+- **Access**: Access ตามระยะเวลาที่จ่าย (Monthly subscription)
 - **Verification**: Manual verification โดย Admin
 
 ### 2. Feature เติมเครดิต (Credit System)
@@ -29,26 +29,27 @@
 
 ## 🚀 Implementation Phases (ลำดับการพัฒนา)
 
-### Phase 1: One-time Subscription System
+### Phase 1: Monthly Subscription System
 **Priority: สูงที่สุด** - เป็นพื้นฐานการเข้าถึงระบบ
 
 #### Database Tables
 ```sql
 -- subscription_plans
-id, name, description, price, features (JSON), active, plan_type, created_at, updated_at
+id, name, description, price_per_month, features (JSON), active, plan_type, created_at, updated_at
 
 -- user_subscriptions  
-id, user_id, subscription_plan_id, status, activated_at, expires_at (NULL = lifetime), paid_amount, notes, created_at, updated_at
+id, user_id, subscription_plan_id, status, activated_at, expires_at (required for monthly), paid_amount, notes, created_at, updated_at
 
 -- payment_slips
 id, user_id, user_subscription_id, amount, status, slip_image, notes, reference_number, payment_date, verified_by_id, verified_at, rejection_reason, created_at, updated_at
 ```
 
 #### Models & Logic
-- **SubscriptionPlan**: แผนการใช้งาน (Basic, Premium, Enterprise)
-- **UserSubscription**: การสมัครของผู้ใช้ (Lifetime access)
+- **SubscriptionPlan**: แผนการใช้งาน (Basic, Premium, Enterprise) - ราคารายเดือน
+- **UserSubscription**: การสมัครของผู้ใช้ (Monthly recurring subscription)
 - **PaymentSlip**: หลักฐานการชำระเงิน + Manual verification
-- **Access Control**: Middleware ตรวจสอบสมาชิกก่อนเข้าใช้งาน
+- **Access Control**: Middleware ตรวจสอบ subscription expiry ก่อนเข้าใช้งาน
+- **Auto-renewal**: ระบบแจ้งเตือนและต่ออายุ subscription
 
 #### Controllers & Views
 - **SubscriptionPlansController**: เลือกแผน + สมัครสมาชิก

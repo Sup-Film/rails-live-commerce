@@ -1,0 +1,45 @@
+<%# app/views/users/new.html.erb %>
+
+<div class="mx-auto md:w-2/3 w-full">
+  <h1 class="font-bold text-4xl">สมัครสมาชิก</h1>
+
+  <%# ใช้ form_with ซึ่งเป็นมาตรฐานใหม่ของ Rails %>
+  <%= form_with(model: @user, url: users_path) do |form| %>
+
+    <%# แสดงข้อความ Error หากมี %>
+    <% if form.object.errors.any? %>
+      <div class="my-3 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold"><%= pluralize(form.object.errors.count, "error") %> prohibited this user from being saved:</strong>
+        <ul class="list-disc ml-5">
+          <% form.object.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="my-5">
+      <%= form.label :name, 'ชื่อผู้ใช้' %>
+      <%= form.text_field :name, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div class="my-5">
+      <%= form.label :email, 'อีเมล' %>
+      <%= form.email_field :email, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div class="my-5">
+      <%= form.label :password, 'รหัสผ่าน' %>
+      <%= form.password_field :password, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div class="my-5">
+      <%= form.label :password_confirmation, 'ยืนยันรหัสผ่าน' %>
+      <%= form.password_field :password_confirmation, class: "block shadow rounded-md border border-gray-200 outline-none px-3 py-2 mt-2 w-full" %>
+    </div>
+
+    <div class="inline">
+      <%= form.submit "สมัครสมาชิก", class: "rounded-lg py-3 px-5 bg-blue-600 text-white inline-block font-medium cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

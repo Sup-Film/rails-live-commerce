@@ -40,115 +40,79 @@
     <header class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
-          <!-- Logo/Brand -->
           <%= link_to root_path, class: "flex items-center space-x-2 text-primary-600 hover:text-primary-700 transition-colors" do %>
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
             <span class="text-xl font-bold">FbConnect</span>
           <% end %>
 
-          <!-- Navigation Menu -->
           <nav class="hidden md:flex items-center space-x-8">
-            <%= link_to root_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
-              Home
-            <% end %>
-            <%= link_to products_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
-              Products
-            <% end %>
+            <%= link_to "Home", root_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
+            <%= link_to "Products", products_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
+
+            <%# --- เปลี่ยนจาก user_signed_in? เป็น logged_in? --- %>
             <% if user_signed_in? %>
-              <%= link_to dashboard_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
-                Dashboard
-              <% end %>
+              <%= link_to "Dashboard", dashboard_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
             <% end %>
-            <%= link_to about_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
-              About
-            <% end %>
-            <%= link_to contact_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" do %>
-              Contact
-            <% end %>
+            <%# หมายเหตุ: about_path และ contact_path อาจจะต้องสร้างใน routes.rb %>
+            <%= link_to "About", "#", class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
+            <%= link_to "Contact", "#", class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
           </nav>
 
-          <!-- User Menu -->
           <div class="flex items-center space-x-4">
+            <%# --- เปลี่ยนจาก user_signed_in? เป็น logged_in? --- %>
             <% if user_signed_in? %>
+
               <div class="flex items-center space-x-3">
-                <div class="flex items-center space-x-2">
-                  <img src="<%= current_user.image || 'https://via.placeholder.com/32x32?text=U' %>" 
-                       alt="<%= current_user.name %>" 
-                       class="w-8 h-8 rounded-full border-2 border-primary-200">
-                  <span class="text-sm font-medium text-gray-700">
-                    <%= current_user.name %>
-                  </span>
-                </div>
-                <%= button_to "Logout", logout_path, 
-                    method: :post,
-                    class: "bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors border-0 cursor-pointer" %>
+                <img src="<%= current_user.image || 'https://ui-avatars.com/api/' %>" 
+                    class="w-8 h-8 rounded-full border-2 border-primary-200">
+                <span class="text-sm font-medium text-gray-700">
+                  <%= current_user.name %>
+                </span>
+
+                <%# --- เปลี่ยนปุ่ม Logout --- %>
+                <%= button_to "Logout", logout_path,
+                method: :delete,
+                class: "bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors border-0 cursor-pointer" %>
               </div>
+
             <% else %>
-              <%= link_to "/auth/facebook", 
-                  class: "bg-primary-600 hover:bg-primary-700 text-white px-6 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2" do %>
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                <span>Login with Facebook</span>
-              <% end %>
+
+              <div class="hidden md:flex items-center space-x-2">
+                <%# ปุ่ม Login with Facebook (เหมือนเดิม) %>
+                <%= link_to "/auth/facebook", class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2" do %>
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                  <span>Login with Facebook</span>
+                <% end %>
+
+                <%# --- เพิ่มปุ่ม Login (Email) และ Sign Up --- %>
+                <%= link_to "เข้าสู่ระบบ", login_path, class: "text-gray-700 hover:bg-gray-100 px-4 py-2 rounded-lg font-medium transition-colors" %>
+                <%= link_to "สมัครสมาชิก", sign_up_path, class: "bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors" %>
+              </div>
+
             <% end %>
 
-            <!-- Mobile menu button -->
             <button class="md:hidden p-2 rounded-lg hover:bg-gray-100" id="mobile-menu-button">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-              </svg>
             </button>
           </div>
         </div>
 
-        <!-- Mobile Navigation Menu -->
         <div class="md:hidden hidden" id="mobile-menu">
-          <div class="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200">
-            <%= link_to root_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
-              Home
-            <% end %>
-            <%= link_to products_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
-              Products
-            <% end %>
-            <% if user_signed_in? %>
-              <%= link_to dashboard_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
-                Dashboard
-              <% end %>
-            <% end %>
-            <%= link_to about_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
-              About
-            <% end %>
-            <%= link_to contact_path, class: "block px-3 py-2 text-gray-700 hover:text-primary-600 font-medium" do %>
-              Contact
-            <% end %>
-          </div>
         </div>
       </div>
     </header>
+
     <main class="container mx-auto px-4 py-8 max-w-screen-2xl">
       <% if notice %>
         <div class="bg-green-50 border-l-4 border-green-400 text-green-800 p-4 mb-6 rounded-r-lg shadow-sm">
-          <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-            </svg>
-            <%= notice %>
-          </div>
+          <%= notice %>
         </div>
       <% end %>
       <% if alert %>
         <div class="bg-red-50 border-l-4 border-red-400 text-red-800 p-4 mb-6 rounded-r-lg shadow-sm">
-          <div class="flex items-center">
-            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-            </svg>
-            <%= alert %>
-          </div>
+          <%= alert %>
         </div>
       <% end %>
+
       <%= yield %>
     </main>
 
