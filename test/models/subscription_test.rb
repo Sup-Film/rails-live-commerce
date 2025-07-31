@@ -2,13 +2,14 @@
 #
 # Table name: subscriptions
 #
-#  id            :bigint           not null, primary key
-#  expires_at    :datetime
-#  status        :integer          default(0), not null
-#  subscribed_at :datetime
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
-#  user_id       :bigint           not null
+#  id               :bigint           not null, primary key
+#  expires_at       :datetime
+#  rejection_reason :text
+#  status           :integer          default("pending_approval"), not null
+#  subscribed_at    :datetime
+#  created_at       :datetime         not null
+#  updated_at       :datetime         not null
+#  user_id          :bigint           not null
 #
 # Indexes
 #

@@ -1,0 +1,37 @@
+<%# app/views/subscriptions/show.html.erb %>
+<div class="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-md text-center">
+  <h1 class="text-3xl font-bold mb-4">สถานะการเป็นสมาชิก</h1>
+
+  <% if @subscription.pending_approval? %>
+    <p class="text-lg text-yellow-800 bg-yellow-100 p-4 rounded-lg">
+      สถานะ: <strong>กำลังรอการอนุมัติ</strong>
+    </p>
+    <p class="mt-4 text-gray-600">เราได้รับข้อมูลของคุณแล้ว และจะทำการตรวจสอบโดยเร็วที่สุด (ปกติภายใน 24 ชั่วโมง)</p>
+
+  <% elsif @subscription.active? %>
+    <p class="text-lg text-green-800 bg-green-100 p-4 rounded-lg">
+      สถานะ: <strong>ใช้งานได้</strong>
+    </p>
+    <p class="mt-4 text-gray-600">
+      คุณสามารถใช้งานได้จนถึงวันที่: <%= l(@subscription.expires_at, format: :long) if @subscription.expires_at %>
+    </p>
+
+  <% elsif @subscription.rejected? %>
+    <p class="text-lg text-red-800 bg-red-100 p-4 rounded-lg">
+      สถานะ: <strong>คำขอถูกปฏิเสธ</strong>
+    </p>
+    <p class="mt-4 text-gray-600">
+      <strong>เหตุผล:</strong> <%= @subscription.rejection_reason.presence || 'ไม่ระบุ' %>
+    </p>
+    <%= link_to 'ลองใหม่อีกครั้ง', new_subscription_path, class: "mt-6 inline-block px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700" %>
+
+  <% elsif @subscription.expired? %>
+    <p class="text-lg text-gray-800 bg-gray-100 p-4 rounded-lg">
+      สถานะ: <strong>หมดอายุ</strong>
+    </p>
+    <p class="mt-4 text-gray-600">การเป็นสมาชิกของคุณหมดอายุแล้ว</p>
+    <%= link_to 'ต่ออายุสมาชิก', new_subscription_path, class: "mt-6 inline-block px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700" %>
+  <% end %>
+
+  <%= link_to 'กลับหน้าแรก', root_path, class: "mt-8 inline-block text-blue-600 hover:underline" %>
+</div>

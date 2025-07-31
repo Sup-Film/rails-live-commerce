@@ -1,0 +1,27 @@
+<%# app/views/subscriptions/new.html.erb %>
+<div class="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-md">
+  <h1 class="text-3xl font-bold mb-4">สมัครสมาชิกรายเดือน</h1>
+  <p class="text-gray-600 mb-6">ค่าบริการ 299 บาท/เดือน</p>
+
+  <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6">
+    <h2 class="font-semibold text-lg mb-2">ขั้นตอนการชำระเงิน</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>โอนเงินจำนวน 299 บาท มาที่บัญชี:</li>
+      <li class="ml-4 font-mono"><strong>ธนาคาร:</strong> กสิกรไทย</li>
+      <li class="ml-4 font-mono"><strong>เลขที่บัญชี:</strong> 123-4-56789-0</li>
+      <li class="ml-4 font-mono"><strong>ชื่อบัญชี:</strong> บริษัท ไลฟ์ ซีเอฟ จำกัด</li>
+      <li>บันทึกสลิปการโอนเงินเป็นไฟล์รูปภาพ (PNG, JPG, JPEG ไม่เกิน 5MB)</li>
+      <li>อัปโหลดสลิปในฟอร์มด้านล่างนี้ และกดยืนยัน</li>
+    </ol>
+  </div>
+
+  <%= form_with(model: @subscription, url: subscription_path) do |form| %>
+    <div class="my-5">
+      <p class="text-gray-700">หลังจากกดยืนยัน ระบบจะตรวจสอบการชำระเงินผ่าน API อัตโนมัติ</p>
+    </div>
+
+    <div>
+      <%= form.submit "ยืนยันและส่งเพื่อตรวจสอบ", class: "w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50" %>
+    </div>
+  <% end %>
+</div>

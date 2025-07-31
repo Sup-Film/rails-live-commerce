@@ -10,7 +10,7 @@
 #  oauth_token      :string
 #  password_digest  :string
 #  provider         :string
-#  role             :integer          default(0), not null
+#  role             :integer          default("user"), not null
 #  uid              :string
 #  created_at       :datetime         not null
 #  updated_at       :datetime         not null
