@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
-  get 'subscriptions/new'
-  get 'subscriptions/create'
-  get 'subscriptions/show'
+  get "subscriptions/new"
+  get "subscriptions/create"
+  get "subscriptions/show"
   get "users/new"
   get "users/create"
   get "/dashboard", to: "dashboards#show", as: :dashboard
@@ -26,7 +26,17 @@ Rails.application.routes.draw do
 
   # Subscription management
   get "subscription_required", to: "pages#subscription_required"
-  resource :subscription, only: [:new, :create, :show]
+  resource :subscription, only: [:new, :show]
+
+  namespace :api do
+    namespace :v1 do
+      resource :subscription, only: [] do
+        member do
+          post :verify_slip
+        end
+      end
+    end
+  end
 
   # OmniAuth routes
   post "/auth/:provider/callback", to: "user_sessions#create"

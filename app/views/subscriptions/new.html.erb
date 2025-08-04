@@ -1,27 +1,126 @@
 <%# app/views/subscriptions/new.html.erb %>
+
 <div class="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-md">
-  <h1 class="text-3xl font-bold mb-4">สมัครสมาชิกรายเดือน</h1>
+
+  <h1 class="text-3xl font-bold mb-4">สมัครสมาชิก / ต่ออายุ</h1>
   <p class="text-gray-600 mb-6">ค่าบริการ 299 บาท/เดือน</p>
 
   <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6">
-    <h2 class="font-semibold text-lg mb-2">ขั้นตอนการชำระเงิน</h2>
+    <h2 class="font-semibold text-lg mb-2">ขั้นตอนการสมัคร</h2>
     <ol class="list-decimal list-inside space-y-1">
-      <li>โอนเงินจำนวน 299 บาท มาที่บัญชี:</li>
-      <li class="ml-4 font-mono"><strong>ธนาคาร:</strong> กสิกรไทย</li>
-      <li class="ml-4 font-mono"><strong>เลขที่บัญชี:</strong> 123-4-56789-0</li>
-      <li class="ml-4 font-mono"><strong>ชื่อบัญชี:</strong> บริษัท ไลฟ์ ซีเอฟ จำกัด</li>
-      <li>บันทึกสลิปการโอนเงินเป็นไฟล์รูปภาพ (PNG, JPG, JPEG ไม่เกิน 5MB)</li>
-      <li>อัปโหลดสลิปในฟอร์มด้านล่างนี้ และกดยืนยัน</li>
+      <li>โอนเงินจำนวน 299 บาท มาที่บัญชี: <strong>บจก. ไลฟ์ ซีเอฟ (กสิกรไทย) 146-6-14469-3</strong></li>
+      <li>บันทึกสลิปการโอนเงินเป็นไฟล์รูปภาพ (PNG, JPG)</li>
+      <li>เลือกไฟล์สลิปในช่องด้านล่างนี้ ระบบจะทำการตรวจสอบโดยอัตโนมัติ</li>
     </ol>
   </div>
 
-  <%= form_with(model: @subscription, url: subscription_path) do |form| %>
-    <div class="my-5">
-      <p class="text-gray-700">หลังจากกดยืนยัน ระบบจะตรวจสอบการชำระเงินผ่าน API อัตโนมัติ</p>
-    </div>
+  <%# ส่วนสำหรับแสดงสถานะจาก JavaScript %>
+  <div id="status-message" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
+    <%# ข้อความจะถูกใส่โดย JavaScript %>
+  </div>
 
-    <div>
-      <%= form.submit "ยืนยันและส่งเพื่อตรวจสอบ", class: "w-full bg-blue-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-blue-700 cursor-pointer disabled:opacity-50" %>
+  <%# เราจะใช้ DIV นี้ในการซ่อน/แสดงส่วนอัปโหลด %>
+  <div id="uploader-container">
+    <div class="my-5">
+      <label for="uploaded-file" class="font-semibold text-lg">เลือกไฟล์สลิปของท่าน</label>
+      <input type="file" 
+            id="uploaded-file"
+            accept="image/png, image/jpeg, image/jpg"
+            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2 cursor-pointer">
     </div>
-  <% end %>
+  </div>
+
+  <%# เป็น Element ว่างๆ ตามโค้dเดิมของคุณ แต่เราจะซ่อนไว้ %>
+  <div id="file-qr-result" class="hidden"></div>
 </div>
+
+<%# --- ส่วนของ JavaScript ทั้งหมด --- %>
+<script type="module">
+  import QrScanner from "/js/qr-scanner.min.js";
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- อ้างอิงถึง Element ต่างๆ ในหน้าเว็บ ---
+    const uploadedFile = document.getElementById('uploaded-file');
+    const fileQrResult = document.getElementById('file-qr-result');
+    const statusMessage = document.getElementById('status-message');
+    const uploaderContainer = document.getElementById('uploader-container');
+
+    // --- ฟังก์ชันสำหรับแสดงสถานะ ---
+    function showStatus(message, isSuccess = true) {
+      statusMessage.textContent = message;
+      statusMessage.className = isSuccess
+        ? 'p-4 mb-4 text-sm rounded-lg bg-blue-50 text-blue-800'
+        : 'p-4 mb-4 text-sm rounded-lg bg-red-50 text-red-800';
+      statusMessage.classList.remove('hidden');
+    }
+
+    // --- ฟังก์ชันสำหรับแสดงผลเมื่อสำเร็จ ---
+    function showSuccess(message) {
+      swal({
+        title: "สำเร็จ!",
+        text: message,
+        icon: "success",
+        button: "ไปที่หน้าแดชบอร์ด",
+      }).then((willRedirect) => {
+        if (willRedirect) {
+          window.location.href = "/dashboard";
+        }
+      });
+      uploaderContainer.classList.add('hidden');
+    }
+
+    // --- ฟังก์ชันสำหรับเรียก API ของเรา (ตัวอย่าง POST) ---
+    function verifySlipWithApi(data) {
+      console.log(data)
+      const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+      fetch("/api/v1/subscription/verify_slip", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(response => {
+        if (response.success) {
+          showSuccess(response.message || "ตรวจสอบสำเร็จ");
+        } else {
+          showStatus(response.message || "เกิดข้อผิดพลาดในการตรวจสอบ", false);
+        }
+      })
+      .catch(() => {
+        showStatus("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์", false);
+      });
+    }
+
+    // --- Event Listener เมื่อผู้ใช้เลือกไฟล์ ---
+    uploadedFile.addEventListener('change', event => {
+      const file = uploadedFile.files[0];
+      if (!file) {
+        return;
+      }
+      showStatus("กำลังตรวจสอบ QR Code จากสลิป...");
+      QrScanner.scanImage(file, { returnDetailedScanResult: true })
+        .then(result => {
+          const qrDataString = result.data;
+          if (!qrDataString || qrDataString === QrScanner.NO_QR_CODE_FOUND) {
+            showStatus("ไม่พบ QR Code ในรูปภาพนี้", false);
+            return;
+          }
+          fileQrResult.textContent = qrDataString;
+          // Parse ข้อมูล
+          const sending_book = qrDataString.substr(18, 3);
+          const transaction_code = qrDataString.substr(25, qrDataString.length - 39);
+          const dataToSend = {
+            sending_book: sending_book,
+            transaction_code: transaction_code
+          };
+          verifySlipWithApi(dataToSend);
+        })
+        .catch(e => {
+          showStatus(e || 'ไม่พบ QR Code ในรูปภาพนี้', false);
+        });
+    });
+  });
+</script>

@@ -13,13 +13,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def create
-    @subscription = current_user.subscriptions.build(subscription_params)
-
-    # if @subscription.save
-    #   redirect_to subscription_path, notice: "คำขอสมัครสมชิกของคุณถูกส่งเรียบร้อยแล้ว กรุณารอการอนุมัติ"
-    # else
-    #   render :new, status: :unprocessable_entity
-    # end
+    
   end
 
   private
