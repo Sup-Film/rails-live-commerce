@@ -2,7 +2,6 @@ class Api::V1::SubscriptionsController < ActionController::API
   def verify_slip
     sending_book = params["sending_book"]
     transaction_code = params["transaction_code"]
-    binding.pry
     data_Verify = SlipVerifyService.verify_slip(sending_book, transaction_code)
 
     unless data_Verify["statusCode"] == "0000"
