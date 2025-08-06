@@ -7,3 +7,12 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+# สร้าง ThirdParty สำหรับ Slip Verification Service
+ThirdParty.find_or_create_by!(name: 'verify_slip') do |tp|
+  tp.slug = 'verify_slip'
+  tp.enabled = true
+  puts "Created ThirdParty record for slip verification service"
+end
+
+puts "Seeds completed successfully!"

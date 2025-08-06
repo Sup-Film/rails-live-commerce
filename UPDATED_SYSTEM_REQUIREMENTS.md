@@ -22,7 +22,6 @@
 
 ### 4. ระบบจ่ายเงิน (Payment System)
 - **Method**: Upload slip (อัพโหลดสลิป)
-- **Verification**: Manual verification
 - **Integration**: รองรับ Third Party ในอนาคต
 
 ---

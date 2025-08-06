@@ -29,4 +29,37 @@ class Subscription < ApplicationRecord
 
   # Validations
   validates :user_id, uniqueness: true
+  validates :payment_reference, presence: true, uniqueness: true
+  validates :expires_at, presence: true
+  validates :subscribed_at, presence: true
+  validates :status, presence: true
+
+  # Scopes
+  scope :active_subscriptions, -> { where(status: :active).where("expires_at > ?", Time.current) }
+  scope :expired_subscriptions, -> { where(status: :expired).or(where("expires_at <= ?", Time.current)) }
+
+  # Methods
+  def active?
+    super && expires_at > Time.current
+  end
+
+  def expired?
+    super || (expires_at && expires_at <= Time.current)
+  end
+
+  def days_until_expiry
+    return 0 if expired?
+    ((expires_at - Time.current) / 1.day).ceil
+  end
+
+  def expires_soon?(days = 3)
+    active? && days_until_expiry <= days
+  end
+
+  # Auto-update expired subscriptions
+  def self.update_expired_subscriptions
+    where(status: :active)
+      .where("expires_at <= ?", Time.current)
+      .update_all(status: :expired)
+  end
 end

@@ -30,6 +30,23 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
 
+  # Subscription methods
+  def current_subscription
+    subscriptions.active.first
+  end
+
+  def subscribed?
+    current_subscription&.active? || false
+  end
+
+  def subscription_expired?
+    !subscribed?
+  end
+
+  def subscription_expires_soon?(days = 3)
+    current_subscription&.expires_soon?(days) || false
+  end
+
   # Validations
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
