@@ -3,6 +3,8 @@
   <p class="text-lg text-gray-700 mb-6">
     ขออภัย คุณต้องเป็นสมาชิกที่อยู่ในสถานะ "ใช้งาน" (Active) เท่านั้นจึงจะสามารถเข้าถึงหน้านี้ได้
   </p>
-  <%= link_to 'กลับไปหน้าแรก', root_path, class: "px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700" %>
-  <%# ในอนาคต เราจะเพิ่มปุ่ม "สมัครสมาชิก" ที่นี่ %>
+  <div class="flex justify-center items-center space-x-4">
+    <%= link_to 'สมัครสมาชิกเลย', new_subscription_path, class: "px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-transform transform hover:scale-105" %>
+    <%= link_to 'กลับไปหน้าแรก', root_path, class: "px-6 py-3 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300" %>
+  </div>
 </div>
