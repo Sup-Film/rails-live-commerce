@@ -16,13 +16,13 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
     end
 
     # ตรวจสอบว่าผู้ใช้มี subscription อยู่แล้วและยังไม่หมดอายุ
-    existing_subscription = current_user.days_until_expiry
-    if existing_subscription&.> 3
+    subscription = current_user.current_subscription
+    if subscription&.active? && subscription.days_until_expiry > 3
       return render json: {
                       message: "คุณมีสมาชิกที่ใช้งานอยู่แล้ว",
                       subscription: {
-                        status: existing_subscription.status,
-                        expires_at: existing_subscription.expires_at,
+                        status: subscription.status,
+                        expires_at: subscription.expires_at,
                       },
                     }, status: :conflict
     end
