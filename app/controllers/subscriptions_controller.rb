@@ -1,7 +1,7 @@
 class SubscriptionsController < ApplicationController
   before_action :require_login
   before_action :find_subscription, only: [:show]
-  before_action :check_existing_subscription, only: [:new, :create]
+  before_action :check_existing_subscription_more_than_3_days, only: [:new, :create]
 
   def show
     @subscription
@@ -9,11 +9,10 @@ class SubscriptionsController < ApplicationController
   end
 
   def new
-    @subscription = Subscription.new
+    # @subscription = Subscription.new
   end
 
   def create
-    
   end
 
   private
@@ -28,9 +27,9 @@ class SubscriptionsController < ApplicationController
     @subscription = current_user.subscriptions.first
   end
 
-  def check_existing_subscription
-    if current_user.subscriptions.where(status: ["active", "pending_approval"]).exists?
-      redirect_to subscription_path, alert: "คุณมีสถานะสมาชิกที่กำลังรออนุมัติหรือใช้งานอยู่แล้ว"
+  def check_existing_subscription_more_than_3_days
+    if current_user.subscribed? && current_user.current_subscription.days_until_expiry > 3
+      redirect_to subscription_path, alert: "คุณมีสถานะสมาชิกที่กำลังรออนุมัติหรือใช้งานอยู่แล้ว (เหลืออีก #{current_user.current_subscription.days_until_expiry} วัน)"
     end
   end
 

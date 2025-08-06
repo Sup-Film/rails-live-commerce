@@ -22,7 +22,7 @@
 
 ### 4. ระบบจ่ายเงิน (Payment System)
 - **Method**: Upload slip (อัพโหลดสลิป)
-- **Integration**: รองรับ Third Party ในอนาคต
+- **Verification**: third party slip verify
 
 ---
 

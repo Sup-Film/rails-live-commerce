@@ -77,7 +77,7 @@ class Order < ApplicationRecord
 
   def checkout_url
     # สำหรับ development ใช้ localhost, production ควรกำหนดใน config
-    base_url = Rails.env.production? ? "https://5ed07b758d8c.ngrok-free.app" : "http://localhost:3000"
+    base_url = Rails.env.production? ? "https://c2d8cfb2db53.ngrok-free.app" : "http://localhost:3000"
     "#{base_url}/checkout/#{checkout_token}"
   end
 

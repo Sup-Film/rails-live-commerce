@@ -66,6 +66,7 @@ group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
   gem 'dotenv-rails'
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
+  gem 'rspec-rails'
 end
 
 group :development do

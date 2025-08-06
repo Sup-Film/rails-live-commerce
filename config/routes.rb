@@ -1,61 +1,57 @@
 Rails.application.routes.draw do
-  get "subscriptions/new"
-  get "subscriptions/create"
-  get "subscriptions/show"
-  get "users/new"
-  get "users/create"
-  get "/dashboard", to: "dashboards#show", as: :dashboard
-  resources :dashboards
-  # Products routes
-  resources :products
-  # Root route
+  # ! กำหนดหน้าแรก
   root "home#index"
 
-  # Register routes
-  get "sign_up", to: "users#new"
-  resources :users, only: [:create]
+  # ! เส้นทางสำหรับหน้าเว็บทั่วไป (Static Pages)
+  get "/about", to: "home#about"
+  get "/contact", to: "home#contact"
 
-  # Login and logout routes
+  # ! เส้นทางสำหรับระบบสมาชิก (Authentication)
+  get "sign_up", to: "users#new"
+  resources :users, only: [:create] # สร้างแค่ POST /users
+
   get "login", to: "user_sessions#new"
   post "login", to: "user_sessions#create"
   delete "logout", to: "user_sessions#destroy"
 
-  # Static pages
-  get "/about", to: "home#about", as: :about
-  get "/contact", to: "home#contact", as: :contact
-
-  # Subscription management
-  get "subscription_required", to: "pages#subscription_required"
-  resource :subscription, only: [:new, :show]
-
-  namespace :api do
-    namespace :v1 do
-      resource :subscription, only: [] do
-        member do
-          post :verify_slip
-        end
-      end
-    end
-  end
-
-  # OmniAuth routes
-  post "/auth/:provider/callback", to: "user_sessions#create"
+  # ! OmniAuth routes สำหรับ Facebook Login
   get "/auth/:provider/callback", to: "user_sessions#create"
   get "/auth/failure", to: "user_sessions#failure"
 
-  # Facebook API routes
-  get "/facebook/profile", to: "facebook#profile", as: :facebook_profile
+  # ! เส้นทางสำหรับฟีเจอร์หลักของแอปพลิเคชัน
+  resource :dashboard, only: [:show] # ใช้ resource (เอกพจน์) เพราะผู้ใช้มีได้แค่ dashboard เดียว
+  resources :products
 
-  # Facebook Live Webhook routes
+  # ! Subscription
+  get "subscription_required", to: "pages#subscription_required"
+  resource :subscription, only: [:new, :show] # ใช้ resource (เอกพจน์) เพราะผู้ใช้มีได้แค่ subscription เดียว
+
+  # ! เส้นทางสำหรับ Checkout
+  # จัดกลุ่มเส้นทางที่เกี่ยวกับ Checkout ไว้ด้วยกัน
+  scope "/checkout", controller: :checkout, as: :checkout do
+    get "/", action: :index, as: :index
+    get "/expired", action: :expired, as: :expired
+
+    scope "/:token" do
+      get "/", action: :show, as: "" # checkout_path
+      patch "/", action: :update
+      get "/confirmation", action: :confirmation, as: :confirmation
+      patch "/complete", action: :complete, as: :complete
+      patch "/cancel", action: :cancel, as: :cancel
+    end
+  end
+
+  # ! เส้นทางสำหรับ Facebook API และ Webhooks
+  get "/facebook/profile", to: "facebook#profile"
   get "/facebook/live/webhooks", to: "facebook_live_webhooks#verify"
   post "/facebook/live/webhooks", to: "facebook_live_webhooks#receive"
 
-  # Checkout routes
-  get "/checkout", to: "checkout#index", as: :checkout_index
-  get "/checkout/:token", to: "checkout#show", as: :checkout
-  patch "/checkout/:token", to: "checkout#update"
-  get "/checkout/:token/confirmation", to: "checkout#confirmation", as: :checkout_confirmation
-  patch "/checkout/:token/complete", to: "checkout#complete", as: :checkout_complete
-  patch "/checkout/:token/cancel", to: "checkout#cancel", as: :checkout_cancel
-  get "/checkout/expired", to: "checkout#expired", as: :expired_checkout
+  # ! เส้นทางสำหรับ API ภายใน (สำหรับ JavaScript เรียกใช้)
+  namespace :api do
+    namespace :v1 do
+      resource :subscription, only: [] do
+        post :verify_slip, on: :member # POST /api/v1/subscription/verify_slip
+      end
+    end
+  end
 end

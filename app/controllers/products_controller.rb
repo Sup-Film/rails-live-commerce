@@ -80,4 +80,11 @@ class ProductsController < ApplicationController
       redirect_to root_path, alert: "กรุณาเข้าสู่ระบบก่อนดำเนินการ."
     end
   end
+
+  # Method สำหรับตรวจสอบสถานะสมาชิก
+  def check_active_subscription
+    unless check_active_subscription?
+      redirect_to subscription_required_path, alert: "กรุณาสมัครสมาชิกรายเดือนก่อนเข้าใช้งานระบบ."
+    end
+  end
 end

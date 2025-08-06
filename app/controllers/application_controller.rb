@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  helper_method :current_user, :user_signed_in?
+  helper_method :current_user, :user_signed_in?, :check_active_subscription?
 
   # จัดการ OmniAuth errors
   rescue_from OmniAuth::Strategies::Facebook::NoAuthorizationCodeError do |exception|
@@ -18,5 +18,9 @@ class ApplicationController < ActionController::Base
   # ถ้า @current_user มีค่า (ไม่เป็น nil) จะ Return true ถ้าไม่มีก็จะ Return false
   def user_signed_in?
     !!current_user
+  end
+
+  def check_active_subscription?
+    current_user&.current_subscription&.active?
   end
 end

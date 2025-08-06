@@ -40,7 +40,7 @@ class Subscription < ApplicationRecord
 
   # Methods
   def active?
-    super && expires_at > Time.current
+    super && expires_at.present? && expires_at > Time.current
   end
 
   def expired?
