@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   # ! กำหนดหน้าแรก
   root "home#index"
 
+  # ! Profile routes
+  resource :profile, only: [:show]
+
   # ! เส้นทางสำหรับหน้าเว็บทั่วไป (Static Pages)
   get "/about", to: "home#about"
   get "/contact", to: "home#contact"
@@ -14,10 +17,6 @@ Rails.application.routes.draw do
   post "login", to: "user_sessions#create"
   delete "logout", to: "user_sessions#destroy"
 
-  # ! OmniAuth routes สำหรับ Facebook Login
-  get "/auth/:provider/callback", to: "user_sessions#create"
-  get "/auth/failure", to: "user_sessions#failure"
-
   # ! เส้นทางสำหรับฟีเจอร์หลักของแอปพลิเคชัน
   resource :dashboard, only: [:show] # ใช้ resource (เอกพจน์) เพราะผู้ใช้มีได้แค่ dashboard เดียว
   resources :products
@@ -25,6 +24,10 @@ Rails.application.routes.draw do
   # ! Subscription
   get "subscription_required", to: "pages#subscription_required"
   resource :subscription, only: [:new, :show] # ใช้ resource (เอกพจน์) เพราะผู้ใช้มีได้แค่ subscription เดียว
+
+  # ! OmniAuth routes สำหรับ Facebook Login
+  get "/auth/:provider/callback", to: "omniauth_callbacks#facebook"
+  get "/auth/failure", to: "omniauth_callbacks#failure"
 
   # ! เส้นทางสำหรับ Checkout
   # จัดกลุ่มเส้นทางที่เกี่ยวกับ Checkout ไว้ด้วยกัน
@@ -42,7 +45,6 @@ Rails.application.routes.draw do
   end
 
   # ! เส้นทางสำหรับ Facebook API และ Webhooks
-  get "/facebook/profile", to: "facebook#profile"
   get "/facebook/live/webhooks", to: "facebook_live_webhooks#verify"
   post "/facebook/live/webhooks", to: "facebook_live_webhooks#receive"
 

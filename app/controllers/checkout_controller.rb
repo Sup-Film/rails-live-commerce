@@ -68,7 +68,7 @@ class CheckoutController < ApplicationController
 
   def check_expiry
     if @order.checkout_expired?
-      redirect_to expired_checkout_path, alert: "ลิงค์หมดอายุแล้ว"
+      redirect_to checkout_expired_path, alert: "ลิงค์หมดอายุแล้ว"
     end
   end
 
