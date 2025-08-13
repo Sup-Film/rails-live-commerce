@@ -1,7 +1,4 @@
 class UserSessionsController < ApplicationController
-  # ยกเว้นการตรวจสอบ CSRF สำหรับ callback จาก OmniAuth
-  skip_before_action :verify_authenticity_token, only: [:create]
-
   def new
   end
 
@@ -31,6 +28,7 @@ class UserSessionsController < ApplicationController
   private
 
   def log_in(user)
+    reset_session
     session[:user_id] = user.id
   end
 end

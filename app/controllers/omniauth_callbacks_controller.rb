@@ -16,6 +16,12 @@ class OmniauthCallbacksController < ApplicationController
       oauth_expires_at: auth.credentials.expires_at.present? ? Time.at(auth.credentials.expires_at) : nil,
     )
 
+    if current_user.changed?
+      current_user.save!
+    else
+      redirect_to profile_path, notice: "บัญชีของคุณเชื่อมต่อกับ Facebook อยู่แล้ว"
+    end
+
     redirect_to profile_path, notice: "เชื่อมต่อบัญชี Facebook สำเร็จ!"
   rescue => e
     redirect_to profile_path, alert: "เกิดข้อผิดพลาดในการเชื่อมต่อกับ Facebook: #{e.message}"
