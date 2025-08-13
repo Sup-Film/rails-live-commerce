@@ -7,6 +7,7 @@ gem 'pry'
 gem 'kaminari'
 gem "bcrypt", "~> 3.1.7"
 gem 'active_storage_validations'
+gem 'rack-attack'
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.5", ">= 7.1.5.1"

@@ -1,10 +1,15 @@
 class UserSessionsController < ApplicationController
+  skip_before_action :verify_authenticity_token, only: :create
+
   def new
+    if cookies[:flash_alert] == "too_many_attempts"
+      flash.now[:alert] = "คุณกรอกผิดเกินจำนวนครั้งที่กำหนด กรุณารอสักครู่ก่อนลองใหม่อีกครั้ง"
+      cookies.delete(:flash_alert)
+    end
   end
 
   def create
     user = User.find_by(email: params[:session][:email])
-
     if user&.authenticate(params[:session][:password])
       log_in(user)
       redirect_to root_path, notice: "เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ #{user.name} 🎉"
