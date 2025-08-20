@@ -8,7 +8,6 @@
 ### 1. บัญชี (Subscription System)
 - **Payment Model**: จ่ายรายเดือน (Monthly recurring payment)
 - **Access**: Access ตามระยะเวลาที่จ่าย (Monthly subscription)
-- **Verification**: Manual verification โดย Admin
 
 ### 2. Feature เติมเครดิต (Credit System)
 - **Purpose**: เติมเครดิตสำหรับค่าขนส่ง
