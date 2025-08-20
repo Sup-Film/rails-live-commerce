@@ -16,6 +16,12 @@ class FacebookLiveCommentService
       return []
     end
 
+    minimum_required_credit = 0
+    unless @user.has_sufficient_credit?(minimum_required_credit)
+      puts "\e[31m[เครดิตไม่เพียงพอ] User ID: #{@user.id}\e[0m"
+      return []
+    end
+
     # url = "https://streaming-graph.facebook.com/#{live_id}/live_comments?access_token=#{@access_token}&comment_rate=one_per_two_seconds&fields=from{name,id},message',created_time"
     # response = HTTParty.get(url)
     # if response.success?
