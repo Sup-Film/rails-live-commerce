@@ -16,12 +16,6 @@ class FacebookLiveCommentService
       return []
     end
 
-    minimum_required_credit = 0
-    unless @user.has_sufficient_credit?(minimum_required_credit)
-      puts "\e[31m[เครดิตไม่เพียงพอ] User ID: #{@user.id}\e[0m"
-      return []
-    end
-
     # url = "https://streaming-graph.facebook.com/#{live_id}/live_comments?access_token=#{@access_token}&comment_rate=one_per_two_seconds&fields=from{name,id},message',created_time"
     # response = HTTParty.get(url)
     # if response.success?
@@ -109,10 +103,10 @@ class FacebookLiveCommentService
 
     # ในอนาคตจะเปลี่ยนไปใช้การเรียก service
     shipping_cost_cents = 5000
+    insufficient_credit = !@user.has_sufficient_credit?(shipping_cost_cents)
 
-    unless @user.has_sufficient_credit?(shipping_cost_cents)
-      puts "\e[31m[เครดิตไม่เพียงพอ] ต้องการ: #{shipping_cost_cents}, มีอยู่: #{@user.credit_balance_cents}\e[0m"
-
+    if insufficient_credit
+      puts "\e[31m[เครดิตไม่เพียงพอกรุณาเติมเครดิต] ต้องการ: #{shipping_cost_cents}, มีอยู่: #{@user.credit_balance_cents}\e[0m"
       # ส่งอีเมลแจ้งเตือน (ทำงานใน Background)
       # SellerMailer.insufficient_credit_notification(
       #   user: @user,
@@ -123,11 +117,14 @@ class FacebookLiveCommentService
       #   },
       #   required_credit: shipping_cost_cents,
       # ).deliver_later
-
-      return nil # บล็อกการสร้างออเดอร์
     end
 
-    existing_order = Order.active_for_duplicate_check.find_by(
+    # รวมออเดอร์ที่ถูกพักไว้ด้วย เพื่อกันการสร้างซ้ำในกรณีเครดิตไม่พอ
+    existing_order = Order.where(deleted_at: nil, status: [
+                                  Order.statuses[:pending],
+                                  Order.statuses[:paid],
+                                  Order.statuses[:on_hold_insufficient_credit],
+                                ]).find_by(
       facebook_user_id: data[:from][:id],
       order_number: found_code,
       user: @user,
@@ -143,10 +140,12 @@ class FacebookLiveCommentService
       unit_price = product.productPrice
       total_amount = unit_price * quantity
 
+      order_status = insufficient_credit ? :on_hold_insufficient_credit : :pending
       order = Order.create!(
         order_number: found_code,
         product: product,
         user: @user,
+        status: order_status,
         quantity: quantity,
         unit_price: unit_price,
         total_amount: total_amount,
@@ -157,7 +156,7 @@ class FacebookLiveCommentService
         comment_time: Time.parse(data[:created_time]),
       )
 
-      puts "\e[32m[สร้างออเดอร์สำเร็จ] Order: #{order.order_number}\e[0m"
+      puts "\e[32m[สร้างออเดอร์สำเร็จ] Order: #{order.order_number} (status: #{order.status})\e[0m"
       return order
     rescue ActiveRecord::RecordInvalid => e
       puts "\e[31m[สร้างออเดอร์ไม่สำเร็จ] Validation failed: #{e.message}\e[0m"
