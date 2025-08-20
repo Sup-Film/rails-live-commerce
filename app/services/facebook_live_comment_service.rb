@@ -6,6 +6,16 @@ class FacebookLiveCommentService
   end
 
   def fetch_comments
+    unless @user
+      puts "\e[31m[ไม่พบ User (merchant)]\e[0m"
+      return []
+    end
+
+    if @user.products.empty?
+      puts "\e[31m[ผู้ขายยังไม่ได้ทำก่ีเพิ่มสินค้าในระบบ] User ID: #{@user.id}\e[0m"
+      return []
+    end
+
     # url = "https://streaming-graph.facebook.com/#{live_id}/live_comments?access_token=#{@access_token}&comment_rate=one_per_two_seconds&fields=from{name,id},message',created_time"
     # response = HTTParty.get(url)
     # if response.success?
@@ -15,16 +25,17 @@ class FacebookLiveCommentService
     # Mock response data for testing
     comments = [
       # สร้าง comment สำหรับ productCode 1
-      *Array.new(5) { |i| { "id" => "c1_#{i}", "message" => "CF 1", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user#{i}", "name" => "User #{i}" } } },
+      *Array.new(2) { |i| { "id" => "c1_#{i}", "message" => "CF 1", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user#{i}", "name" => "User #{i}" } } },
       # สร้าง comment สำหรับ productCode 2
-      *Array.new(5) { |i| { "id" => "c2_#{i}", "message" => "CF 2", "created_time" => "2023-10-01T12:01:00+0000", "from" => { "id" => "user#{i + 5}", "name" => "User #{i + 5}" } } },
+      *Array.new(2) { |i| { "id" => "c2_#{i}", "message" => "CF 2", "created_time" => "2023-10-01T12:01:00+0000", "from" => { "id" => "user#{i + 2}", "name" => "User #{i + 2}" } } },
       # สร้าง comment สำหรับ productCode 3
-      *Array.new(5) { |i| { "id" => "c3_#{i}", "message" => "CF 3", "created_time" => "2023-10-01T12:02:00+0000", "from" => { "id" => "user#{i + 10}", "name" => "User #{i + 10}" } } },
-      # สร้าง comment สำหรับ productCode 12345
-      *Array.new(5) { |i| { "id" => "c12345_#{i}", "message" => "CF 12345", "created_time" => "2023-10-01T12:03:00+0000", "from" => { "id" => "user#{i + 15}", "name" => "User #{i + 15}" } } },
+      *Array.new(2) { |i| { "id" => "c3_#{i}", "message" => "CF 3", "created_time" => "2023-10-01T12:02:00+0000", "from" => { "id" => "user#{i + 10}", "name" => "User #{i + 10}" } } },
+      # สร้าง comment สำหรับ productCode 12342
+      *Array.new(2) { |i| { "id" => "c4#{i}", "message" => "CF 4", "created_time" => "2023-10-01T12:03:00+0000", "from" => { "id" => "user#{i + 12}", "name" => "User #{i + 12}" } } },
     ].flatten
 
     # นำข้อมูลใน comment มาวนลูป และทำการสร้าง Hash ใหม่สำหรับแต่ละ comment
+    created_orders = []
     comments.each do |comment|
       comment_data = {
         id: comment["id"],
@@ -37,25 +48,36 @@ class FacebookLiveCommentService
       }
 
       cf_result = create_order(comment_data)
+      created_orders << cf_result if cf_result.present?
     end
-    # else
-    #   Rails.logger.error "Failed to fetch comments for Facebook Live ID: #{@live_id}, Response: #{response.body}"
-    #   []
-    # end
+    created_orders
   rescue StandardError => e
     Rails.logger.error("Failed to fetch comments for Facebook Live: #{@live_id}, Error: #{e.message}")
     []
   end
 
   def create_order(data)
-    puts "\n---------------------"
-    puts "[สร้างออเดอร์ใหม่] Data:"
-    puts JSON.pretty_generate(data)
-    puts "---------------------"
-
     message = data[:message].to_s
-    product_codes = Product.active.pluck(:productCode).map(&:to_s)
-    found_code = product_codes.find { |code| message.include?(code) }
+
+    # ดึงรหัสสินค้า, กำจัด nil, แปลงเป็น string และ normalize ให้เป็น lowercase
+    product_codes = Product.active.where(user_id: @user.id).pluck(:productCode).compact.map { |c| c.to_s.strip.downcase }.uniq
+
+    if product_codes.empty?
+      puts "\e[31m[Merchant ไม่มีสินค้าเลย] User ID: #{@user.id}\e[0m"
+      return nil
+    end
+
+    # ตรวจรหัสที่ยาวสุดก่อน เพื่อหลีกเลี่ยงการ match แบบ substring ที่ไม่ต้องการ
+    product_codes.sort_by! { |c| -c.length }
+
+    # normalize ข้อความเพื่อตรวจ (lowercase)
+    message_norm = message.downcase
+
+    # ใช้ word-boundary regex เพื่อแมตช์เป็นคำหรือ token แยก (ลด false positives)
+    found_code = product_codes.find do |code|
+      regex = /\b#{Regexp.escape(code)}\b/
+      message_norm.match?(regex)
+    end
 
     unless found_code
       puts "\e[31m[ไม่พบสินค้าในข้อความ] Product codes: #{product_codes.join(", ")}\e[0m"
@@ -73,6 +95,31 @@ class FacebookLiveCommentService
       return nil
     end
     puts "\e[36m[ใช้ merchant] #{@user.name} (ID: #{@user.id})\e[0m"
+
+    puts "\n---------------------"
+    puts "[สร้างออเดอร์ใหม่] Data:"
+    puts JSON.pretty_generate(data)
+    puts "---------------------"
+
+    # ในอนาคตจะเปลี่ยนไปใช้การเรียก service
+    shipping_cost_cents = 5000
+
+    unless @user.has_sufficient_credit?(shipping_cost_cents)
+      puts "\e[31m[เครดิตไม่เพียงพอ] ต้องการ: #{shipping_cost_cents}, มีอยู่: #{@user.credit_balance_cents}\e[0m"
+
+      # ส่งอีเมลแจ้งเตือน (ทำงานใน Background)
+      # SellerMailer.insufficient_credit_notification(
+      #   user: @user,
+      #   order_details: {
+      #     customer_name: data.dig(:from, :name),
+      #     product_name: product.productName,
+      #     product_code: product.productCode,
+      #   },
+      #   required_credit: shipping_cost_cents,
+      # ).deliver_later
+
+      return nil # บล็อกการสร้างออเดอร์
+    end
 
     existing_order = Order.active_for_duplicate_check.find_by(
       facebook_user_id: data[:from][:id],

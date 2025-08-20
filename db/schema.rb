@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_08_04_062934) do
+ActiveRecord::Schema[7.1].define(version: 2025_08_19_094500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,23 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_04_062934) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "credit_ledgers", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "entry_type", null: false
+    t.integer "amount_cents", default: 0, null: false
+    t.integer "balance_after_cents", null: false
+    t.string "idempotency_key", null: false
+    t.string "reference_type"
+    t.bigint "reference_id"
+    t.text "notes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["entry_type"], name: "index_credit_ledgers_on_entry_type"
+    t.index ["idempotency_key"], name: "index_credit_ledgers_on_idempotency_key", unique: true
+    t.index ["reference_type", "reference_id"], name: "index_credit_ledgers_on_reference"
+    t.index ["user_id"], name: "index_credit_ledgers_on_user_id"
+  end
+
   create_table "orders", force: :cascade do |t|
     t.string "order_number", null: false
     t.integer "status", default: 0
@@ -68,6 +85,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_04_062934) do
     t.datetime "deleted_at"
     t.string "tracking"
     t.string "ref"
+    t.text "notes"
     t.index ["checkout_token"], name: "index_orders_on_checkout_token", unique: true
     t.index ["checkout_token_expires_at"], name: "index_orders_on_checkout_token_expires_at"
     t.index ["deleted_at"], name: "index_orders_on_deleted_at"
@@ -133,6 +151,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_08_04_062934) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "credit_ledgers", "users"
   add_foreign_key "orders", "products"
   add_foreign_key "orders", "users"
   add_foreign_key "products", "users"

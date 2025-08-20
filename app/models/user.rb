@@ -29,6 +29,7 @@ class User < ApplicationRecord
   has_many :products, dependent: :destroy
   has_many :orders, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
+  has_many :credit_ledgers, -> { order(created_at: :asc) }
 
   # Subscription methods
   def current_subscription
@@ -45,6 +46,23 @@ class User < ApplicationRecord
 
   def subscription_expires_soon?(days = 3)
     current_subscription&.expires_soon?(days) || false
+  end
+
+  # Credit Ledger methods
+
+  # ดึงยอดล่าสุด (หน่วยเป็น cents)
+  def credit_balance_cents
+    credit_ledgers.last&.balance_after_cents || 0
+  end
+
+  # แปลงจาก cents เป็นบาท
+  def credit_balance
+    credit_balance_cents / 100.0
+  end
+
+  # ตรวจสอบว่ามีเครดิตเพียงพอไหม จากจำนวนที่ต้องการ (หน่วยเป็น cents)
+  def has_sufficient_credit?(amount_in_cents)
+    credit_balance_cents >= amount_in_cents
   end
 
   # Validations

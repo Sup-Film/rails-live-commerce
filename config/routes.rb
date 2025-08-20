@@ -39,6 +39,7 @@ Rails.application.routes.draw do
       get "/", action: :show, as: "" # checkout_path
       patch "/", action: :update
       get "/confirmation", action: :confirmation, as: :confirmation
+      get "/on_hold", action: :on_hold, as: :on_hold
       patch "/complete", action: :complete, as: :complete
       patch "/cancel", action: :cancel, as: :cancel
     end

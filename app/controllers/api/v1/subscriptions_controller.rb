@@ -105,6 +105,8 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
       end
 
       if subscription.save
+        # ProcessHeldOrdersJob.perform_later(current_user.id)
+
         render json: {
           message: "เปิดใช้งานสมาชิกสำเร็จ!",
           subscription: {

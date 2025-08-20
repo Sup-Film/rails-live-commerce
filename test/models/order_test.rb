@@ -13,6 +13,7 @@
 #  customer_phone            :string
 #  deleted_at                :datetime
 #  facebook_user_name        :string
+#  notes                     :text
 #  order_number              :string           not null
 #  paid_at                   :datetime
 #  quantity                  :integer          default(1)

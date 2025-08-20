@@ -13,6 +13,7 @@
 #  customer_phone            :string
 #  deleted_at                :datetime
 #  facebook_user_name        :string
+#  notes                     :text
 #  order_number              :string           not null
 #  paid_at                   :datetime
 #  quantity                  :integer          default(1)
@@ -59,12 +60,14 @@ class Order < ApplicationRecord
   validates :quantity, numericality: { greater_than: 0 }
 
   enum status: {
-    pending: 0,
-    paid: 1,
-    confirmed: 2,
-    cancelled: 3,
-    refunded: 4,
-    deleted: 5,
+    pending: 0,                   # ผู้ซื้อยังไม่กรอกข้อมูล
+    awaiting_payment: 1,          # รอผู้ซื้อชำระเงิน (เครดิตผู้ขายพอ)
+    paid: 2,                      # ชำระเงินแล้ว
+    confirmed: 3,                 # ยืนยันออเดอร์/เตรียมส่ง
+    cancelled: 4,                 # ยกเลิก
+    refunded: 5,                  # คืนเงิน
+    deleted: 6,
+    on_hold_insufficient_credit: 7, # พักไว้ชั่วคราว
   }
 
   before_validation :generate_checkout_token, on: :create # สร้าง checkout token อัตโนมัติ

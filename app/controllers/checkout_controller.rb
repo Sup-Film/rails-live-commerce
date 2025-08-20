@@ -5,6 +5,7 @@ class CheckoutController < ApplicationController
   def index
     # หน้ารายการคำสั่งซื้อทั้งหมด
     @orders = Order.where(status: "pending").order(created_at: :desc)
+    @user = current_user
   end
 
   def show
@@ -23,20 +24,51 @@ class CheckoutController < ApplicationController
   end
 
   def update
-    # อัพเดทข้อมูลลูกค้าและจำนวนสินค้า
-    result = OrderService.update_order(@order, order_params)
+    @order.assign_attributes(order_params)
 
-    if result
-      redirect_to checkout_confirmation_path(@order.checkout_token),
-                  notice: "บันทึกข้อมูลเรียบร้อยแล้ว"
+    # คำนวณราคาขนส่งจากการเรียกใช้ 3rd party skybox
+    # shipping_cost = SkyboxService.calculate_shipping_cost(@order)
+    shipping_cost_cents = 5000 # สมมุติค่าส่ง
+
+    seller = @order.user
+    if seller.has_sufficient_credit?(shipping_cost_cents)
+      @order.status = :awaiting_payment
+      if @order.save
+        redirect_to checkout_confirmation_path(@order.checkout_token),
+                    notice: "บันทึกข้อมูลเรียบร้อยแล้ว"
+      else
+        flash.now[:alert] = "ไม่สามารถบันทึกข้อมูลได้: #{@order.errors.full_messages.join(", ")}"
+        render :show
+      end
     else
-      flash.now[:alert] = "ไม่สามารถบันทึกข้อมูลได้: #{@order.errors.full_messages.join(", ")}"
-      render :show
+      # ถ้าเครดิตไม่พอ
+      @order.status = :on_hold_insufficient_credit
+      @order.save(validate: false) # ต้องข้าม validation บางอย่างถ้ามี
+
+      # แจ้งเตือนไปยังผู้ขาย
+      # SellerMailer.insufficient_credit_notification(
+      #   user: @user,
+      #   order_details: {
+      #     customer_name: @order.customer_name,
+      #     product_name: @order.product&.productName || @order.product&.name,
+      #     product_code: @order.product&.productCode || @order.product&.code,
+      #   },
+      #   required_credit: shipping_cost_cents,
+      # ).deliver_later
+
+      # 5. แสดงหน้าพักออเดอร์ให้ผู้ซื้อเห็น
+      redirect_to checkout_on_hold_path(@order.checkout_token)
     end
   end
 
+  def on_hold
+    # View ที่จะบอกว่า "ออเดอร์ถูกพักไว้ชั่วคราว"
+  end
+
   def confirmation
-    # หน้ายืนยันข้อมูลก่อนชำระเงิน
+    unless @order.awaiting_payment? || @order.paid?
+      return redirect_to appropriate_checkout_path, alert: "สถานะออเดอร์มีการเปลี่ยนแปลง"
+    end
   end
 
   def complete
@@ -85,5 +117,17 @@ class CheckoutController < ApplicationController
       :quantity, :customer_name, :customer_phone,
       :customer_email, :customer_address, :notes
     )
+  end
+  
+  # Helper method เพื่อหา path ที่ถูกต้องตามสถานะของ order
+  def appropriate_checkout_path
+    case @order.status
+    when 'on_hold_insufficient_credit'
+      checkout_on_hold_path(@order.checkout_token)
+    when 'pending'
+      checkout_path(@order.checkout_token)
+    else
+      checkout_confirmation_path(@order.checkout_token)
+    end
   end
 end
