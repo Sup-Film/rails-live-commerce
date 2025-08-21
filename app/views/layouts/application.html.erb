@@ -69,7 +69,7 @@
                     <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1a2 2 0 00-2 2v1H6a2 2 0 00-2 2v1H3a1 1 0 000 2h1v1a2 2 0 002 2h2v1a2 2 0 002 2h2a2 2 0 002-2v-1h2a1 1 0 100-2h-1v-1a2 2 0 00-2-2h-2V6a2 2 0 00-2-2V3a2 2 0 00-2-2z"/></svg>
                     <span class="text-sm font-medium">฿<%= number_with_precision(current_user.credit_balance, precision: 2) %></span>
                   </div>
-                  <%= link_to new_subscription_path, class: "text-sm text-primary-600 hover:underline font-medium" do %>
+                  <%= link_to new_credit_path, class: "text-sm text-primary-600 hover:underline font-medium" do %>
                     เติมเครดิต
                   <% end %>
                 </div>

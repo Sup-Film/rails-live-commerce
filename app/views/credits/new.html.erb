@@ -1,0 +1,135 @@
+<%# app/views/credits/new.html.erb %>
+
+<div class="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-md">
+
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-3xl font-bold">เติมเครดิต</h1>
+    <div class="text-right">
+      <p class="text-gray-500">เครดิตคงเหลือ</p>
+      <p class="text-2xl font-bold text-primary-600"><%= number_to_currency(@current_balance, unit: "฿") %></p>
+    </div>
+  </div>
+  <p class="text-gray-600 mb-6">เครดิตจะถูกใช้สำหรับค่าขนส่งเมื่อมีออเดอร์ใหม่เกิดขึ้น</p>
+
+  <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6">
+    <h2 class="font-semibold text-lg mb-2">ขั้นตอนการเติมเครดิต</h2>
+    <ol class="list-decimal list-inside space-y-1">
+      <li>โอนเงินจำนวนที่ต้องการมาที่บัญชี: <strong>บจก. ไลฟ์ ซีเอฟ (กสิกรไทย) 146-6-14469-3</strong></li>
+      <li>บันทึกสลิปการโอนเงินเป็นไฟล์รูปภาพ (PNG, JPG)</li>
+      <li>เลือกไฟล์สลิปในช่องด้านล่างนี้ ระบบจะทำการตรวจสอบยอดเงินและเติมเครดิตให้อัตโนมัติ</li>
+    </ol>
+  </div>
+
+  <%# ส่วนสำหรับแสดงสถานะจาก JavaScript %>
+  <div id="status-message" class="hidden p-4 mb-4 text-sm rounded-lg" role="alert">
+    <%# ข้อความจะถูกใส่โดย JavaScript %>
+  </div>
+
+  <%# ส่วนอัปโหลด %>
+  <div id="uploader-container">
+    <div class="my-5">
+      <label for="uploaded-file" class="font-semibold text-lg">เลือกไฟล์สลิปของท่าน</label>
+      <input type="file"
+             id="uploaded-file"
+             accept="image/png, image/jpeg, image/jpg"
+             class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mt-2 cursor-pointer">
+    </div>
+  </div>
+
+</div>
+
+<%# --- ส่วนของ JavaScript ทั้งหมด (เหมือนกับหน้า Subscription) --- %>
+<script type="module">
+  import QrScanner from "/js/qr-scanner.min.js";
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const uploadedFile = document.getElementById('uploaded-file');
+    const statusMessage = document.getElementById('status-message');
+    const uploaderContainer = document.getElementById('uploader-container');
+
+    function showStatus(message, isSuccess = true) {
+      statusMessage.textContent = message;
+      statusMessage.className = isSuccess
+        ? 'p-4 mb-4 text-sm rounded-lg bg-blue-50 text-blue-800'
+        : 'p-4 mb-4 text-sm rounded-lg bg-red-50 text-red-800';
+      statusMessage.classList.remove('hidden');
+    }
+
+    function showSuccess(message) {
+        Swal.fire({
+            title: "สำเร็จ!",
+            text: message,
+            icon: "success",
+            confirmButtonText: 'ตกลง'
+        }).then(() => {
+            // Reload the page to show the new balance
+            window.location.reload();
+        });
+        uploaderContainer.style.display = 'none'; // ซ่อนฟอร์มหลังสำเร็จ
+    }
+
+    // ฟังก์ชันสำหรับเรียก API ของเรา (POST)
+    // *** เราจะสร้าง API endpoint นี้ใน step ถัดไป ***
+    function topUpCreditWithApi(data) {
+      console.log("Sending data to API:", data);
+      const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
+      
+      // *** หมายเหตุ: เราจะสร้าง API endpoint นี้ใน Step ถัดไป ***
+      fetch("/api/v1/credit/top_up", {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showSuccess(data.message || "เติมเครดิตสำเร็จ!");
+        } else {
+          showStatus(data.message || "เกิดข้อผิดพลาดในการตรวจสอบ", false);
+        }
+      })
+      .catch(() => {
+        showStatus("เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์", false);
+      });
+
+      // ---- โค้ดชั่วคราวสำหรับ Demo ----
+      // showStatus("กำลังตรวจสอบสลิปกับเซิร์ฟเวอร์...", true);
+      // setTimeout(() => {
+      //   showSuccess("เติมเครดิตสำเร็จ! ยอดเงิน 500.00 บาทถูกเพิ่มเข้าสู่บัญชีของคุณแล้ว");
+      // }, 2000);
+    }
+
+    uploadedFile.addEventListener('change', event => {
+      const file = uploadedFile.files[0];
+      if (!file) {
+        return;
+      }
+      showStatus("กำลังสแกน QR Code จากสลิป...", true);
+      
+      QrScanner.scanImage(file, { returnDetailedScanResult: true })
+        .then(result => {
+          const qrDataString = result.data;
+          if (!qrDataString || qrDataString === QrScanner.NO_QR_CODE_FOUND) {
+            showStatus("ไม่พบ QR Code ในรูปภาพนี้ กรุณาอัปโหลดสลิปที่มี QR Code ชัดเจน", false);
+            return;
+          }
+          
+          const sending_bank = qrDataString.substr(18, 3);
+          const transaction_code = qrDataString.substr(25, qrDataString.length - 39);
+          
+          const dataToSend = {
+            sending_bank: sending_bank,
+            transaction_code: transaction_code
+          };
+          
+          topUpCreditWithApi(dataToSend); // เรียก API เพื่อเติมเงิน
+        })
+        .catch(e => {
+          showStatus(e || 'ไม่สามารถสแกน QR Code จากรูปภาพนี้ได้', false);
+        });
+    });
+  });
+</script>

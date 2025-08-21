@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resource :credit, only: [:new]
   # ! กำหนดหน้าแรก
   root "home#index"
 
@@ -52,8 +53,13 @@ Rails.application.routes.draw do
   # ! เส้นทางสำหรับ API ภายใน (สำหรับ JavaScript เรียกใช้)
   namespace :api do
     namespace :v1 do
+      get "credits/top_up"
       resource :subscription, only: [] do
         post :verify_slip, on: :member # POST /api/v1/subscription/verify_slip
+      end
+
+      resource :credit, only: [] do
+        post :top_up # สร้าง POST /api/v1/credit/top_up
       end
     end
   end

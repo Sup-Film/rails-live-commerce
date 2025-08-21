@@ -7,7 +7,7 @@ class CreditService
 
   # เติมเครดิต
   def self.top_up(user:, amount_cents:, idempotency_key:, reference: nil, notes: nil)
-    add_entry(
+    result = add_entry(
       user: user,
       entry_type: :top_up,
       amount_cents: amount_cents.abs, # ใช้ค่าบวกเสมอ
@@ -15,6 +15,12 @@ class CreditService
       reference: reference,
       notes: notes,
     )
+
+    if result.present?
+      ProcessHeldOrdersJob.perform_later(user.id)
+    end
+
+    result
   end
 
   # หักเครดิต
