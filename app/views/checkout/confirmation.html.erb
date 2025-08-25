@@ -25,10 +25,9 @@
 
             <p class="text-gray-500 text-sm my-4">หลังจากโอนเงินเรียบร้อยแล้ว กรุณา **อัปโหลดสลิป** ด้านล่างนี้เพื่อยืนยัน</p>
 
-            <%# ✨ แก้ไข input file ให้มี ID ที่ถูกต้อง ✨ %>
             <form id="slip-payment-form" data-order-token="<%= @order.checkout_token %>">
               <input type="file" name="payment[slip]" id="slip-file-input" accept="image/*" required
-                     class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4">
+                    class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-4">
 
               <button type="submit"
                       class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition-colors text-lg">
@@ -46,16 +45,17 @@
               <svg class="w-16 h-16 text-green-500 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             </div>
             <h3 class="text-2xl font-bold text-green-600 mb-3">ชำระเงินเรียบร้อยแล้ว!</h3>
-            <p class="text-gray-700 mb-4">เราได้รับการยืนยันการชำระเงินของคุณแล้ว<br>ผู้ขายกำลังเตรียมจัดส่งสินค้าให้คุณ</p>
+            <p class="text-gray-700 mb-4">เราได้รับการยืนยันการชำระเงินของคุณแล้ว<br>
+              ผู้ขายกำลังเตรียมจัดส่งสินค้าให้คุณ</p>
             <%= link_to "กลับสู่หน้าหลัก", root_path, class: "text-primary-600 hover:underline" %>
           </div>
 
         <% else %>
           <%# ... ส่วนนี้ถูกต้องแล้ว ... %>
           <div class="text-center">
-             <p>สถานะออเดอร์ปัจจุบัน: <span class="font-bold"><%= @order.status.humanize %></span></p>
-             <p class="text-gray-500 mt-2">ไม่สามารถดำเนินการต่อได้ในขณะนี้</p>
-             <%= link_to "กลับสู่หน้าหลัก", root_path, class: "text-primary-600 hover:underline mt-4 inline-block" %>
+            <p>สถานะออเดอร์ปัจจุบัน: <span class="font-bold"><%= @order.status.humanize %></span></p>
+            <p class="text-gray-500 mt-2">ไม่สามารถดำเนินการต่อได้ในขณะนี้</p>
+            <%= link_to "กลับสู่หน้าหลัก", root_path, class: "text-primary-600 hover:underline mt-4 inline-block" %>
           </div>
         <% end %>
 
@@ -118,7 +118,7 @@
         statusDiv.innerHTML = '<p class="text-red-600">กรุณาเลือกไฟล์สลิปก่อน</p>';
         return;
       }
-      
+
       submitButton.disabled = true;
       submitButton.classList.add('opacity-50', 'cursor-not-allowed');
       statusDiv.innerHTML = '<p class="text-blue-600">กำลังสแกน QR Code จากสลิป...</p>';
@@ -127,7 +127,7 @@
         .then(result => {
           const qrDataString = result.data;
           if (!qrDataString) { throw new Error("ไม่พบ QR Code ในรูปภาพนี้"); }
-          
+
           const sending_bank = qrDataString.substr(18, 3);
           const transaction_code = qrDataString.substr(25, qrDataString.length - 39);
 
@@ -135,7 +135,7 @@
           formData.append('payment[slip]', file); // 1. แนบไฟล์
           formData.append('payment[sending_bank]', sending_bank); // 2. แนบข้อมูลที่สแกนได้
           formData.append('payment[transaction_code]', transaction_code); // 3. แนบข้อมูลที่สแกนได้
-          
+
           // ส่ง FormData ไปที่ API
           submitPaymentApi(formData);
         })

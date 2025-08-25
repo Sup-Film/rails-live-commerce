@@ -45,25 +45,25 @@ class SlipVerifyService
     # Log ข้อมูลที่ใช้ตรวจสอบสลิป
     Rails.logger.info "Verifying slip - Sending bank: #{sending_book}, Transaction code: #{transaction_code}"
 
-    # 1. ตรวจสอบและค้นหา ThirdParty service สำหรับ slip verification
+    # ตรวจสอบและค้นหา ThirdParty service สำหรับ slip verification
     verify_slip_service = ThirdParty.find_by(name: SLIP_VERIFY_NAME)
 
-    # 2. ถ้าไม่พบ ThirdParty record ให้คืน error
+    # ถ้าไม่พบ ThirdParty record ให้คืน error
     unless verify_slip_service
       Rails.logger.error "ThirdParty record for #{SLIP_VERIFY_NAME} not found"
       return { "statusCode" => "9999", "message" => "ระบบตรวจสอบสลิปไม่พร้อมใช้งาน" }
     end
 
-    # 3. ดึง token สำหรับเรียก API
+    # ดึง token สำหรับเรียก API
     token = verify_slip_service.token
 
-    # 4. ตรวจสอบว่า token หมดอายุหรือใกล้หมดอายุ ถ้าใช่ให้ขอ token ใหม่
+    # ตรวจสอบว่า token หมดอายุหรือใกล้หมดอายุ ถ้าใช่ให้ขอ token ใหม่
     if verify_slip_service.token_expires_soon?
       Rails.logger.info "Token expired or expiring soon, getting new token"
       token = get_token
     end
 
-    # 5. เตรียม URL และสร้าง HTTP POST request สำหรับตรวจสอบสลิป
+    # เตรียม URL และสร้าง HTTP POST request สำหรับตรวจสอบสลิป
     url = URI("#{BASE_URL}/api/skybox")
 
     https = Net::HTTP.new(url.host, url.port)
@@ -78,16 +78,16 @@ class SlipVerifyService
       "transactionCode" => transaction_code,
     })
 
-    # 6. ส่ง request ไปยัง API และรับ response
+    # ส่ง request ไปยัง API และรับ response
     response = https.request(request)
 
-    # 7. ตรวจสอบ response code ถ้าไม่ใช่ 200 ให้คืน error
+    # ตรวจสอบ response code ถ้าไม่ใช่ 200 ให้คืน error
     unless response.code == '200'
       Rails.logger.error "Slip verification failed: #{response.code} - #{response.body}"
       return { "statusCode" => "9998", "message" => "ไม่สามารถตรวจสอบสลิปได้" }
     end
 
-    # 8. แปลง response เป็น JSON และ log ผลลัพธ์
+    # แปลง response เป็น JSON และ log ผลลัพธ์
     result = JSON.parse(response.body)
     Rails.logger.info "Slip verification result: #{result['statusCode']}"
     result
