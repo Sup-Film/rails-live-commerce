@@ -52,6 +52,7 @@ class Order < ApplicationRecord
   scope :active_for_duplicate_check, -> { where(deleted_at: nil, status: [Order.statuses[:pending], Order.statuses[:paid]]) }
   belongs_to :product
   belongs_to :user
+  has_many :payments, as: :payable, dependent: :destroy
 
   validates :order_number, presence: true
   validates :facebook_comment_id, presence: true
@@ -77,6 +78,10 @@ class Order < ApplicationRecord
   scope :active, -> { where.not(status: ["cancelled", "deleted"]) }
   scope :not_deleted, -> { where.not(status: "deleted") }
   scope :cancellable, -> { where(status: ["pending", "paid"]) }
+
+  def total_amount_cents
+    (self.total_amount.to_f * 100).to_i
+  end
 
   def checkout_url
     # สำหรับ development ใช้ localhost, production ควรกำหนดใน config

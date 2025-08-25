@@ -53,6 +53,7 @@ Rails.application.routes.draw do
   # ! เส้นทางสำหรับ API ภายใน (สำหรับ JavaScript เรียกใช้)
   namespace :api do
     namespace :v1 do
+      get "orders/submit_payment"
       get "credits/top_up"
       resource :subscription, only: [] do
         post :verify_slip, on: :member # POST /api/v1/subscription/verify_slip
@@ -60,6 +61,12 @@ Rails.application.routes.draw do
 
       resource :credit, only: [] do
         post :top_up # สร้าง POST /api/v1/credit/top_up
+      end
+
+      resources :orders, only: [], param: :token do
+        member do
+          post :submit_payment
+        end
       end
     end
   end
