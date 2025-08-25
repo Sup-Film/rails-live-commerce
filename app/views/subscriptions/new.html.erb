@@ -8,10 +8,26 @@
   <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg mb-6">
     <h2 class="font-semibold text-lg mb-2">ขั้นตอนการสมัคร</h2>
     <ol class="list-decimal list-inside space-y-1">
-      <li>โอนเงินจำนวน 299 บาท มาที่บัญชี: <strong>บจก. ไลฟ์ ซีเอฟ (กสิกรไทย) 146-6-14469-3</strong></li>
+      <li>โอนเงินจำนวน 299 บาท มาที่บัญชี: <strong>บจก. ไลฟ์ ซีเอฟ (กสิกรไทย) 146-6-14469-3</strong> หรือทำการสแกนจ่าย QR CODE</li>
       <li>บันทึกสลิปการโอนเงินเป็นไฟล์รูปภาพ (PNG, JPG)</li>
       <li>เลือกไฟล์สลิปในช่องด้านล่างนี้ ระบบจะทำการตรวจสอบโดยอัตโนมัติ</li>
     </ol>
+  </div>
+
+  <div class="text-center">
+    <h3 class="text-xl font-bold text-gray-800 mb-2">ยอดชำระทั้งสิ้น</h3>
+    <p class="text-5xl font-bold text-primary-600 mb-6">฿299</p>
+
+    <div class="p-4 bg-gray-50 border rounded-lg mb-6">
+      <p class="font-semibold">สแกน QR Code เพื่อชำระเงิน</p>
+      <%# หมายเหตุ: ควรเปลี่ยนเบอร์โทรศัพท์/เลขบัญชีเป็นของคุณ %>
+      <img src="https://promptpay.io/0812345678/299.png" alt="QR Code" class="mx-auto my-4 w-48 h-48 border rounded-lg">
+      <p class="text-sm"><strong>ชื่อบัญชี:</strong> บริษัท ไลฟ์ ซีเอฟ จำกัด</p>
+      <p class="text-sm"><strong>ธนาคาร:</strong> กสิกรไทย</p>
+    </div>
+
+    <p class="text-gray-500 text-sm my-4">หลังจากโอนเงินเรียบร้อยแล้ว กรุณา **อัปโหลดสลิป** ด้านล่างนี้เพื่อยืนยัน</p>
+    <div id="payment-status" class="mt-4"></div>
   </div>
 
   <%# ส่วนสำหรับแสดงสถานะจาก JavaScript %>
