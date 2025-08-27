@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   root "home#index"
 
   # ! Profile routes
-  resource :profile, only: [:show]
+  resource :profile
 
   # ! เส้นทางสำหรับหน้าเว็บทั่วไป (Static Pages)
   get "/about", to: "home#about"

@@ -2,18 +2,21 @@
 #
 # Table name: users
 #
-#  id               :bigint           not null, primary key
-#  email            :string           not null
-#  image            :string
-#  name             :string
-#  oauth_expires_at :datetime
-#  oauth_token      :string
-#  password_digest  :string
-#  provider         :string
-#  role             :integer          default("user"), not null
-#  uid              :string
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
+#  id                  :bigint           not null, primary key
+#  bank_account_name   :string
+#  bank_account_number :string
+#  bank_code           :string
+#  email               :string           not null
+#  image               :string
+#  name                :string
+#  oauth_expires_at    :datetime
+#  oauth_token         :string
+#  password_digest     :string
+#  provider            :string
+#  role                :integer          default("user"), not null
+#  uid                 :string
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
 #
 # Indexes
 #
@@ -24,12 +27,31 @@ class User < ApplicationRecord
 
   # Enums
   enum role: { user: 0, admin: 1 }
+  BANK_CODES = {
+    "BBL"   => "002", # ธนาคารกรุงเทพ
+    "KBANK" => "004", # ธนาคารกสิกรไทย
+    "KTB"   => "006", # ธนาคารกรุงไทย
+    "TTB"   => "011", # ธนาคารทหารไทยธนชาต
+    "SCB"   => "014", # ธนาคารไทยพาณิชย์
+    "UOB"   => "025", # ธนาคารยูโอบี
+    "BAY"   => "022", # ธนาคารกรุงศรีอยุธยา
+    "GSB"   => "030", # ธนาคารออมสิน
+    "BAAC"  => "034", # ธ.ก.ส.
+    "CITI"  => "069", # ธนาคารซิตี้แบงก์
+    "CIMB"  => "067", # ธนาคาร CIMB ไทย
+    "KKP"   => "070", # ธนาคารเกียรตินาคินภัทร
+  }.freeze
 
   # Relations
   has_many :products, dependent: :destroy
   has_many :orders, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
   has_many :credit_ledgers, -> { order(created_at: :asc) }
+
+  # Bank code
+  def bank_name
+    BANK_CODES.key(self.bank_code)
+  end
 
   # Subscription methods
   def current_subscription
@@ -69,4 +91,7 @@ class User < ApplicationRecord
   validates :name, presence: true
   validates :email, presence: true, uniqueness: true, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :password, length: { minimum: 6 }, if: -> { password.present? }
+  validates :bank_account_number, presence: true, length: { in: 10..12 }, numericality: { only_integer: true }, allow_blank: true
+  validates :bank_account_name, presence: true, allow_blank: true
+  validates :bank_code, inclusion: { in: BANK_CODES.values }, allow_blank: true
 end

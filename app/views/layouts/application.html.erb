@@ -53,6 +53,7 @@
             <%# --- เปลี่ยนจาก user_signed_in? เป็น logged_in? --- %>
             <% if user_signed_in? %>
               <%= link_to "Dashboard", dashboard_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
+              <%= link_to "Profile", profile_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
             <% end %>
             <%# หมายเหตุ: about_path และ contact_path อาจจะต้องสร้างใน routes.rb %>
             <%= link_to "About", about_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
@@ -63,7 +64,7 @@
             <%# --- เปลี่ยนจาก user_signed_in? เป็น logged_in? --- %>
             <% if user_signed_in? %>
 
-              <div class="flex items-center space-x-3">
+              <div class="relative group flex items-center space-x-3">
                 <div class="flex items-center space-x-3">
                   <div class="bg-yellow-50 text-yellow-800 px-3 py-1 rounded-full border border-yellow-100 shadow-sm flex items-center space-x-2">
                     <svg class="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1a2 2 0 00-2 2v1H6a2 2 0 00-2 2v1H3a1 1 0 000 2h1v1a2 2 0 002 2h2v1a2 2 0 002 2h2a2 2 0 002-2v-1h2a1 1 0 100-2h-1v-1a2 2 0 00-2-2h-2V6a2 2 0 00-2-2V3a2 2 0 00-2-2z"/></svg>
@@ -73,16 +74,25 @@
                     เติมเครดิต
                   <% end %>
                 </div>
-                <img src="<%= current_user.image || 'https://ui-avatars.com/api/' %>" 
-                    class="w-8 h-8 rounded-full border-2 border-primary-200">
-                <span class="text-sm font-medium text-gray-700">
-                  <%= current_user.name %>
-                </span>
 
-                <%# --- เปลี่ยนปุ่ม Logout --- %>
-                <%= button_to "Logout", logout_path,
-                method: :delete,
-                class: "bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors border-0 cursor-pointer" %>
+                <div class="ml-3 relative">
+                  <button id="user-menu-button" class="flex items-center focus:outline-none" aria-haspopup="true" aria-expanded="false" tabindex="0">
+                    <img src="<%= current_user.image || 'https://ui-avatars.com/api/?name=' + ERB::Util.url_encode(current_user.name) %>" class="w-8 h-8 rounded-full border-2 border-primary-200">
+                  </button>
+
+                  <div class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden group-hover:block" id="user-dropdown">
+                    <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button">
+                      <%= link_to profile_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100", role: "menuitem" do %>
+                        โปรไฟล์
+                      <% end %>
+                      <%= link_to edit_profile_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100", role: "menuitem" do %>
+                        ตั้งค่าโปรไฟล์
+                      <% end %>
+                      <div class="border-t my-1"></div>
+                      <%= button_to "Logout", logout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-0" %>
+                    </div>
+                  </div>
+                </div>
               </div>
 
             <% else %>
@@ -166,6 +176,45 @@
         const mobileMenu = document.getElementById('mobile-menu');
         mobileMenu.classList.toggle('hidden');
       });
+
+      // Click to toggle dropdown with small hide-delay to improve UX when moving mouse
+      (function() {
+        const btn = document.getElementById('user-menu-button');
+        const dropdown = document.getElementById('user-dropdown');
+        if (!btn || !dropdown) return;
+
+        let hideTimeout = null;
+        const HIDE_DELAY = 300; // ms
+
+        const show = () => {
+          if (hideTimeout) { clearTimeout(hideTimeout); hideTimeout = null; }
+          dropdown.classList.remove('hidden');
+        };
+
+        const hide = () => {
+          if (hideTimeout) clearTimeout(hideTimeout);
+          hideTimeout = setTimeout(() => dropdown.classList.add('hidden'), HIDE_DELAY);
+        };
+
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (dropdown.classList.contains('hidden')) show(); else hide();
+        });
+
+        btn.addEventListener('mouseenter', show);
+        btn.addEventListener('focus', show);
+        btn.addEventListener('mouseleave', hide);
+
+        dropdown.addEventListener('mouseenter', show);
+        dropdown.addEventListener('mouseleave', hide);
+
+        // Close when clicking outside immediately
+        document.addEventListener('click', function(e) {
+          if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+          }
+        });
+      })();
 
       // Initialize AOS
       document.addEventListener('DOMContentLoaded', function() {

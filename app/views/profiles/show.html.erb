@@ -10,9 +10,31 @@
       <p class="font-semibold">อีเมล:</p>
       <p class="text-gray-700"><%= current_user.email %></p>
     </div>
+    <div>
+      <p class="font-semibold">เลขบัญชีธนาคาร:</p>
+      <p class="text-gray-700"><%= current_user.bank_account_number.presence || '-' %></p>
+    </div>
+    <div>
+      <p class="font-semibold">ชื่อบัญชี:</p>
+      <p class="text-gray-700"><%= current_user.bank_account_name.presence || '-' %></p>
+    </div>
+    <div>
+      <p class="font-semibold">ธนาคาร:</p>
+      <p class="text-gray-700"><%= current_user.bank_name || current_user.bank_code || '-' %></p>
+    </div>
+    <div>
+      <p class="font-semibold">ยอดเครดิต:</p>
+      <p class="text-gray-700">฿<%= number_with_precision(current_user.credit_balance, precision: 2) %></p>
+    </div>
+    <div class="flex justify-end">
+      <%= link_to edit_profile_path, class: "inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white font-medium rounded hover:bg-primary-700 transition" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h6M11 9h6M11 13h6M5 7h.01M5 11h.01M5 15h.01M3 21h18"/></svg>
+        <span>แก้ไขโปรไฟล์</span>
+      <% end %>
+    </div>
     <div class="border-t pt-4">
       <h2 class="text-xl font-bold mb-4">การเชื่อมต่อ Facebook</h2>
-      
+
       <%# --- นี่คือ Logic สำคัญ --- %>
       <% if current_user.provider == "facebook" %>
         <div class="p-4 bg-green-100 text-green-800 rounded-lg flex items-center space-x-3">

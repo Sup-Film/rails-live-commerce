@@ -2,18 +2,21 @@
 #
 # Table name: users
 #
-#  id               :bigint           not null, primary key
-#  email            :string           not null
-#  image            :string
-#  name             :string
-#  oauth_expires_at :datetime
-#  oauth_token      :string
-#  password_digest  :string
-#  provider         :string
-#  role             :integer          default("user"), not null
-#  uid              :string
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
+#  id                  :bigint           not null, primary key
+#  bank_account_name   :string
+#  bank_account_number :string
+#  bank_code           :string
+#  email               :string           not null
+#  image               :string
+#  name                :string
+#  oauth_expires_at    :datetime
+#  oauth_token         :string
+#  password_digest     :string
+#  provider            :string
+#  role                :integer          default("user"), not null
+#  uid                 :string
+#  created_at          :datetime         not null
+#  updated_at          :datetime         not null
 #
 # Indexes
 #
