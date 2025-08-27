@@ -1,55 +1,171 @@
-<div class="max-w-2xl mx-auto p-8 bg-white rounded-lg shadow-md">
-  <h1 class="text-3xl font-bold mb-6">โปรไฟล์ของฉัน</h1>
+<div class="max-w-6xl mx-auto p-6 sm:p-10 bg-white rounded-2xl shadow-lg">
+  <header class="flex items-center justify-between mb-8">
+    <div class="flex items-center space-x-4">
+      <div class="w-20 h-20 flex items-center justify-center bg-indigo-50 text-indigo-700 rounded-full text-2xl font-bold" aria-hidden="true">
+        <%# Avatar placeholder: แสดงตัวอักษรตัวแรกของผู้ใช้ ถ้ามี %>
+        <%= (current_user.name || "?").strip.first&.upcase %>
+      </div>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-semibold">โปรไฟล์ของฉัน</h1>
+        <p class="text-sm text-gray-500">จัดการข้อมูลส่วนตัวและการเชื่อมต่อกับบริการต่าง ๆ</p>
+      </div>
+    </div>
 
-  <div class="space-y-4">
-    <div>
-      <p class="font-semibold">ชื่อ:</p>
-      <p class="text-gray-700"><%= current_user.name %></p>
-    </div>
-    <div>
-      <p class="font-semibold">อีเมล:</p>
-      <p class="text-gray-700"><%= current_user.email %></p>
-    </div>
-    <div>
-      <p class="font-semibold">เลขบัญชีธนาคาร:</p>
-      <p class="text-gray-700"><%= current_user.bank_account_number.presence || '-' %></p>
-    </div>
-    <div>
-      <p class="font-semibold">ชื่อบัญชี:</p>
-      <p class="text-gray-700"><%= current_user.bank_account_name.presence || '-' %></p>
-    </div>
-    <div>
-      <p class="font-semibold">ธนาคาร:</p>
-      <p class="text-gray-700"><%= current_user.bank_name || current_user.bank_code || '-' %></p>
-    </div>
-    <div>
-      <p class="font-semibold">ยอดเครดิต:</p>
-      <p class="text-gray-700">฿<%= number_with_precision(current_user.credit_balance, precision: 2) %></p>
-    </div>
-    <div class="flex justify-end">
-      <%= link_to edit_profile_path, class: "inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white font-medium rounded hover:bg-primary-700 transition" do %>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5h6M11 9h6M11 13h6M5 7h.01M5 11h.01M5 15h.01M3 21h18"/></svg>
-        <span>แก้ไขโปรไฟล์</span>
+    <div class="flex items-center space-x-3">
+      <%= link_to edit_profile_path, class: "inline-flex items-center px-3 py-2 bg-white border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500" do %>
+        <svg class="w-4 h-4 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+        ตั้งค่าโปรไฟล์
       <% end %>
     </div>
-    <div class="border-t pt-4">
-      <h2 class="text-xl font-bold mb-4">การเชื่อมต่อ Facebook</h2>
+  </header>
 
-      <%# --- นี่คือ Logic สำคัญ --- %>
-      <% if current_user.provider == "facebook" %>
-        <div class="p-4 bg-green-100 text-green-800 rounded-lg flex items-center space-x-3">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          <span>เชื่อมต่อกับบัญชี Facebook เรียบร้อยแล้ว</span>
+  <main class="space-y-8">
+    <%# ส่วนข้อมูลส่วนตัว %>
+    <section class="bg-gray-50 p-6 rounded-lg">
+      <h2 class="text-lg font-medium text-gray-700 mb-6">ข้อมูลส่วนตัว</h2>
+
+      <div class="flex items-start space-x-6">
+        <div class="hidden sm:block">
+          <% if current_user.image.present? %>
+            <img src="<%= current_user.image %>" alt="<%= current_user.name %> avatar" class="w-24 h-24 rounded-full object-cover border" />
+          <% else %>
+            <div class="w-24 h-24 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-700 text-2xl font-bold border"><%= (current_user.name || "?").strip.first&.upcase %></div>
+          <% end %>
         </div>
-      <% else %>
-        <p class="text-gray-600 mb-4">
-          เชื่อมต่อบัญชี Facebook ของคุณเพื่อเปิดใช้งานระบบรับคอมเมนต์จากไลฟ์สด
-        </p>
-        <%= link_to "/auth/facebook", class: "inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors" do %>
-          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          <span>เชื่อมต่อกับ Facebook</span>
-        <% end %>
-      <% end %>
-    </div>
-  </div>
+
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold text-gray-800"><%= current_user.name.presence || "-" %></h3>
+          <p class="text-sm text-gray-500"><%= current_user.email %></p>
+
+          <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="p-4 bg-white border rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">เข้าร่วมเมื่อ</p>
+              <p class="text-sm text-gray-800"><%= l(current_user.created_at, format: :long) rescue "-" %></p>
+            </div>
+            <div class="p-4 bg-white border rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">เครดิตคงเหลือ</p>
+              <p class="text-sm font-medium text-gray-800"><%= number_to_currency(current_user.credit_balance || 0, unit: "฿") %></p>
+            </div>
+            <div class="p-4 bg-white border rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">การสมัครสมาชิก</p>
+              <p class="text-sm text-gray-800"><%= current_user.subscribed? ? "active" : "ไม่มีการสมัคร" %></p>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <div class="p-4 bg-white border rounded-lg">
+              <p class="text-xs text-gray-500 mb-1">บัญชีธนาคาร</p>
+              <p class="text-sm text-gray-800"><%= current_user.bank_account_name.presence || "-" %> <span class="text-gray-400">(<%= current_user.bank_account_number.presence || "-" %>)</span></p>
+              <p class="text-xs text-gray-500 mt-1">รหัสธนาคาร: <%= current_user.bank_code.presence || "-" %> <%= current_user.bank_name.present? ? "(" + current_user.bank_name + ")" : "" %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <%# ส่วนการเชื่อมต่อกับบริการต่าง ๆ %>
+    <section class="bg-white border border-gray-100 p-6 rounded-lg">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-lg font-medium text-gray-700">การเชื่อมต่อกับบริการ</h2>
+        <span class="text-sm text-gray-500">จัดการการเชื่อมต่อกับแพลตฟอร์มต่าง ๆ</span>
+      </div>
+
+      <%# Grid สำหรับ providers - ขยายได้ง่ายในอนาคต %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <%# Facebook Provider %>
+        <div class="p-6 border rounded-xl <%= current_user.provider == 'facebook' ? 'border-green-200 bg-green-50' : 'border-gray-200 bg-white' %> hover:shadow-md transition-all">
+          <div class="flex items-center space-x-3 mb-4">
+            <div class="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-gray-800">Facebook</h3>
+              <% if current_user.provider == "facebook" %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                  ✓ เชื่อมต่อแล้ว
+                </span>
+              <% else %>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  ยังไม่เชื่อมต่อ
+                </span>
+              <% end %>
+            </div>
+          </div>
+
+          <p class="text-sm text-gray-600 mb-6">รับคอมเมนต์จาก Facebook Live และจัดการออเดอร์อัตโนมัติ</p>
+
+          <div class="space-y-3">
+            <% if current_user.provider == "facebook" %>
+              <button type="button" disabled class="w-full inline-flex items-center justify-center px-4 py-3 bg-green-500 text-white font-medium rounded-lg cursor-default opacity-80">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                เชื่อมต่อสำเร็จ
+              </button>
+            <% else %>
+              <%= link_to "/auth/facebook", class: "w-full inline-flex items-center justify-center px-4 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors" do %>
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                เชื่อมต่อกับ Facebook
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <%# Placeholder cards สำหรับ providers ในอนาคต %>
+        <div class="p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:border-gray-300 transition-colors">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-gray-300 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </div>
+            <h3 class="font-medium text-gray-500 mb-2">Instagram</h3>
+            <p class="text-sm text-gray-400 mb-4">เชื่อมต่อกับ Instagram Live</p>
+            <span class="inline-flex items-center px-3 py-1.5 bg-gray-200 text-gray-500 text-sm rounded-lg">
+              เร็ว ๆ นี้
+            </span>
+          </div>
+        </div>
+
+        <div class="p-6 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 hover:border-gray-300 transition-colors">
+          <div class="text-center">
+            <div class="w-12 h-12 bg-gray-300 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+              </svg>
+            </div>
+            <h3 class="font-medium text-gray-500 mb-2">TikTok</h3>
+            <p class="text-sm text-gray-400 mb-4">เชื่อมต่อกับ TikTok Live</p>
+            <span class="inline-flex items-center px-3 py-1.5 bg-gray-200 text-gray-500 text-sm rounded-lg">
+              เร็ว ๆ นี้
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <%# ข้อมูลเพิ่มเติมเกี่ยวกับการเชื่อมต่อ %>
+      <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+        <div class="flex items-start space-x-3">
+          <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div>
+            <h4 class="text-sm font-medium text-blue-900 mb-1">ข้อมูลเกี่ยวกับการเชื่อมต่อ</h4>
+            <p class="text-sm text-blue-700">
+              การเชื่อมต่อกับแพลตฟอร์มต่าง ๆ จะช่วยให้คุณสามารถรับคอมเมนต์จากการไลฟ์สดและจัดการออเดอร์ได้อัตโนมัติ 
+              ข้อมูลของคุณจะถูกเก็บรักษาอย่างปลอดภัยและใช้เฉพาะในการดำเนินการที่จำเป็นเท่านั้น
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mt-8 text-xs text-gray-400">
+    หมายเหตุ: ข้อมูลการเชื่อมต่อใช้สำหรับการดึงคอมเมนต์จาก Live Stream เท่านั้น
+  </footer>
 </div>
