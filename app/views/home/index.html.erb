@@ -3,10 +3,10 @@
   <div class="absolute inset-0 bg-grid-pattern opacity-5"></div>
   <div class="relative px-8 py-16 text-center">
     <h1 class="text-5xl font-bold text-gray-900 mb-6" data-aos="fade-up" data-aos-delay="200">
-      Connect with <span class="text-primary-600">Facebook</span>
+      เชื่อมต่อ <span class="text-primary-600">Social Platform</span> ของคุณ
     </h1>
     <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="400">
-      Seamlessly integrate your Facebook account and unlock powerful social commerce features
+      รองรับการเชื่อมต่อ Facebook, Instagram, TikTok และแพลตฟอร์มอื่น ๆ เพื่อปลดล็อกฟีเจอร์ Social Commerce อัตโนมัติ
     </p>
   </div>
 </div>
@@ -20,26 +20,23 @@
             class="w-24 h-24 rounded-full object-cover border-4 border-primary-200 shadow-lg">
         <div class="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-3 border-white"></div>
       </div>
-      
       <div class="flex-1 text-center md:text-left" data-aos="fade-left" data-aos-delay="300">
         <h2 class="text-3xl font-bold text-gray-900 mb-2">
-          Welcome back, <%= current_user.name %>!
+          ยินดีต้อนรับกลับ, <%= current_user.name %>!
         </h2>
         <p class="text-gray-600 mb-4"><%= current_user.email %></p>
-        
         <div class="flex flex-wrap gap-3 justify-center md:justify-start" data-aos="fade-up" data-aos-delay="400">
           <%= link_to profile_path, class: "inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors" do %>
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
-            View Profile
+            ดูโปรไฟล์
           <% end %>
-          
           <%= link_to products_path, class: "inline-flex items-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg transition-colors" do %>
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
             </svg>
-            Browse Products
+            สินค้าทั้งหมด
           <% end %>
         </div>
       </div>
@@ -52,52 +49,53 @@
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="100">
     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4" data-aos="zoom-in" data-aos-delay="200">
       <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
       </svg>
     </div>
     <h3 class="text-lg font-semibold text-gray-900 mb-2">Secure Authentication</h3>
-    <p class="text-gray-600">Connect securely with OAuth 2.0 authentication powered by Facebook</p>
+    <p class="text-gray-600">เข้าสู่ระบบและเชื่อมต่อกับโซเชียลแพลตฟอร์มต่าง ๆ อย่างปลอดภัยด้วย OAuth 2.0</p>
   </div>
-  
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="200">
     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4" data-aos="zoom-in" data-aos-delay="300">
       <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
       </svg>
     </div>
     <h3 class="text-lg font-semibold text-gray-900 mb-2">Real-time Updates</h3>
-    <p class="text-gray-600">Get instant notifications and stay synchronized with your Facebook content</p>
+    <p class="text-gray-600">รับข้อมูลและแจ้งเตือนแบบเรียลไทม์จากทุกโซเชียลที่คุณเชื่อมต่อ</p>
   </div>
-  
   <div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow" data-aos="fade-up" data-aos-delay="300">
     <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4" data-aos="zoom-in" data-aos-delay="400">
       <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <rect x="4" y="4" width="16" height="16" rx="4" stroke="currentColor" stroke-width="2" fill="none"/>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
       </svg>
     </div>
     <h3 class="text-lg font-semibold text-gray-900 mb-2">Easy Integration</h3>
-    <p class="text-gray-600">Seamlessly integrate your social data with our powerful e-commerce platform</p>
+    <p class="text-gray-600">นำข้อมูลจากโซเชียลต่าง ๆ มาต่อยอดธุรกิจของคุณได้ง่าย ๆ ในที่เดียว</p>
   </div>
 </div>
 
 <!-- CTA Section -->
 <div class="bg-gradient-to-r from-primary-600 to-indigo-600 rounded-2xl p-8 text-center text-white" data-aos="fade-up">
-  <h2 class="text-3xl font-bold mb-4" data-aos="fade-up" data-aos-delay="100">Ready to Get Started?</h2>
+  <h2 class="text-3xl font-bold mb-4" data-aos="fade-up" data-aos-delay="100">เริ่มต้นใช้งาน Social Integration วันนี้</h2>
   <p class="text-primary-100 mb-6 max-w-2xl mx-auto" data-aos="fade-up" data-aos-delay="200">
-    Join thousands of users who are already leveraging the power of Facebook integration for their business
+    เข้าร่วมกับผู้ใช้งานนับพันที่เชื่อมต่อโซเชียลเพื่อขยายธุรกิจและสร้างประสบการณ์ใหม่ ๆ ให้ลูกค้า
   </p>
   <div class="flex flex-col sm:flex-row gap-4 justify-center" data-aos="zoom-in" data-aos-delay="300">
     <%= link_to products_path, class: "inline-flex items-center bg-white text-primary-600 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition-colors" do %>
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
       </svg>
-      Explore Products
+      ดูสินค้า
     <% end %>
     <a href="#" class="inline-flex items-center border-2 border-white text-white hover:bg-white hover:text-primary-600 font-semibold py-3 px-6 rounded-lg transition-colors">
       <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
       </svg>
-      Learn More
+      เรียนรู้เพิ่มเติม
     </a>
   </div>
 </div>

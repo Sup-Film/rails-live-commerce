@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>My Facebook App</title>
+  <title>SocialConnect Platform</title>
     <%= csrf_meta_tags %> <%= csp_meta_tag %>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -42,8 +42,11 @@
       <div class="container mx-auto px-4">
         <div class="flex justify-between items-center h-16">
           <%= link_to root_path, class: "flex items-center space-x-2 text-primary-600 hover:text-primary-700 transition-colors" do %>
-            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-            <span class="text-xl font-bold">FbConnect</span>
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 32 32">
+              <circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="2" fill="#fff"/>
+              <path d="M10 16a6 6 0 1 0 12 0 6 6 0 0 0-12 0zm13.5 2.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-15 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" fill="currentColor"/>
+            </svg>
+            <span class="text-xl font-bold">SocialConnect</span>
           <% end %>
 
           <nav class="hidden md:flex items-center space-x-8">
@@ -53,7 +56,6 @@
             <%# --- เปลี่ยนจาก user_signed_in? เป็น logged_in? --- %>
             <% if user_signed_in? %>
               <%= link_to "Dashboard", dashboard_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
-              <%= link_to "Profile", profile_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
             <% end %>
             <%# หมายเหตุ: about_path และ contact_path อาจจะต้องสร้างใน routes.rb %>
             <%= link_to "About", about_path, class: "text-gray-700 hover:text-primary-600 font-medium transition-colors" %>
@@ -132,13 +134,14 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div class="col-span-1 md:col-span-2">
             <div class="flex items-center space-x-2 mb-4">
-              <svg class="w-8 h-8 text-primary-600" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              <svg class="w-8 h-8 text-primary-600" fill="none" viewBox="0 0 32 32">
+                <circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="2" fill="#fff"/>
+                <path d="M10 16a6 6 0 1 0 12 0 6 6 0 0 0-12 0zm13.5 2.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm-15 0a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z" fill="currentColor"/>
               </svg>
-              <span class="text-xl font-bold text-gray-900">FbConnect</span>
+              <span class="text-xl font-bold text-gray-900">SocialConnect</span>
             </div>
             <p class="text-gray-600 mb-4">
-              Connect with Facebook API and manage your social commerce seamlessly.
+              เชื่อมต่อและจัดการทุก Social Platform ของคุณในที่เดียว รองรับ Facebook, Instagram, TikTok และอื่น ๆ เพื่อธุรกิจยุคใหม่
             </p>
           </div>
 
@@ -164,7 +167,7 @@
 
         <div class="border-t border-gray-200 pt-6 mt-8 text-center">
           <p class="text-gray-500 text-sm">
-            &copy; <%= Time.current.year %> FbConnect. All rights reserved.
+            &copy; <%= Time.current.year %> SocialConnect. All rights reserved.
           </p>
         </div>
       </div>
