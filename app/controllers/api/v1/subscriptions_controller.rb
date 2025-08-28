@@ -4,6 +4,8 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
   OUR_BANK_NUMBER = "1466144693".freeze
 
   def verify_slip
+    # logger.info "Verifying slip with params: #{JSON.pretty_generate(slip_params)}"
+    
     # ตรวจสอบ parameters
     unless slip_params[:sending_book].present? && slip_params[:transaction_code].present?
       return render json: {
@@ -17,7 +19,7 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
 
     # ตรวจสอบว่าผู้ใช้มี subscription อยู่แล้วและยังไม่หมดอายุ
     subscription = current_user.current_subscription
-    if subscription&.active? && subscription.days_until_expiry > 3
+    if subscription_conflict?(subscription)
       return render json: {
                       message: "คุณมีสมาชิกที่ใช้งานอยู่แล้ว",
                       subscription: {
@@ -27,12 +29,59 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
                     }, status: :conflict
     end
 
-    # ตรวจสอบสลิปผ่าน SlipVerifyService
+    ตรวจสอบสลิปผ่าน SlipVerifyService
     data_verify = SlipVerifyService.verify_slip(
       slip_params[:sending_book],
       slip_params[:transaction_code]
     )
 
+    # Mockup
+    # data_verify = {
+    #   "statusCode" => "0000",
+    #   "message" => "ตรวจสอบสำเร็จ",
+    #   "data" => {
+    #     "transRef" => "TRX123456",
+    #     "receiver" => {
+    #       "proxy" => {
+    #         "value" => "1466144693",
+    #       },
+    #       "account" => {
+    #         "value" => "1466144693",
+    #       },
+    #     },
+    #     "amount" => 299.00,
+    #   },
+    # }
+
+    trans_ref = validated_payment(data_verify)
+    return if performed? # ถ้า validated_payment? มีการ render แล้วให้หยุดการทำงาน
+
+    # สร้างหรืออัปเดต subscription
+    create_or_update_subscription(trans_ref)
+  rescue => e
+    Rails.logger.error "Subscription verification error: #{e.message}"
+    Rails.logger.error e.backtrace.join("\n")
+    render json: {
+      message: "เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง",
+    }, status: :internal_server_error
+  end
+
+  private
+
+  def slip_params
+    params.permit(:sending_book, :transaction_code)
+  end
+
+  def extract_receiver_bank_number(verified_data)
+    verified_data.dig("receiver", "proxy", "value")&.gsub("-", "") ||
+    verified_data.dig("receiver", "account", "value")&.gsub("-", "")
+  end
+
+  def subscription_conflict?(subscription)
+    subscription&.active? && subscription.days_until_expiry > 3
+  end
+
+  def validated_payment(data_verify)
     unless data_verify["statusCode"] == "0000"
       return render json: {
                       message: data_verify["message"] || "ใบเสร็จไม่ถูกต้อง หรือ ไม่สามารถตรวจสอบได้",
@@ -64,25 +113,7 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
                     }, status: :unprocessable_entity
     end
 
-    # สร้างหรืออัปเดต subscription
-    create_or_update_subscription(trans_ref)
-  rescue => e
-    Rails.logger.error "Subscription verification error: #{e.message}"
-    Rails.logger.error e.backtrace.join("\n")
-    render json: {
-      message: "เกิดข้อผิดพลาดในระบบ กรุณาลองใหม่อีกครั้ง",
-    }, status: :internal_server_error
-  end
-
-  private
-
-  def slip_params
-    params.permit(:sending_book, :transaction_code)
-  end
-
-  def extract_receiver_bank_number(verified_data)
-    verified_data.dig("receiver", "proxy", "value")&.gsub("-", "") ||
-    verified_data.dig("receiver", "account", "value")&.gsub("-", "")
+    trans_ref
   end
 
   def create_or_update_subscription(trans_ref)
