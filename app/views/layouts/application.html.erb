@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <title>SocialConnect Platform</title>
+    <title>SocialConnect Platform</title>
     <%= csrf_meta_tags %> <%= csp_meta_tag %>
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -89,6 +89,10 @@
                       <% end %>
                       <%= link_to edit_profile_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100", role: "menuitem" do %>
                         ตั้งค่าโปรไฟล์
+                      <% end %>
+                      <%# Add membership/subscription management link %>
+                      <%= link_to new_subscription_path, class: "block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100", role: "menuitem" do %>
+                        สมาชิก
                       <% end %>
                       <div class="border-t my-1"></div>
                       <%= button_to "Logout", logout_path, method: :delete, class: "w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-0" %>

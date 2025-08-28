@@ -2,10 +2,12 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
   # ค่าคงที่สำหรับการตรวจสอบ
   REQUIRED_AMOUNT = 299.00
   OUR_BANK_NUMBER = "1466144693".freeze
+  # ถ้ามีวันเหลือมากกว่าค่านี้ ระบบจะถือว่าไม่ต้องต่ออายุ (ป้องกันการต่ออายุก่อนเวลา)
+  RENEWAL_BLOCK_THRESHOLD_DAYS = 30
 
   def verify_slip
     # logger.info "Verifying slip with params: #{JSON.pretty_generate(slip_params)}"
-    
+
     # ตรวจสอบ parameters
     unless slip_params[:sending_book].present? && slip_params[:transaction_code].present?
       return render json: {
@@ -18,18 +20,18 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
     end
 
     # ตรวจสอบว่าผู้ใช้มี subscription อยู่แล้วและยังไม่หมดอายุ
-    subscription = current_user.current_subscription
-    if subscription_conflict?(subscription)
-      return render json: {
-                      message: "คุณมีสมาชิกที่ใช้งานอยู่แล้ว",
-                      subscription: {
-                        status: subscription.status,
-                        expires_at: subscription.expires_at,
-                      },
-                    }, status: :conflict
-    end
+    # subscription = current_user.current_subscription
+    # if subscription_conflict?(subscription)
+    #   return render json: {
+    #                   message: "คุณมีสมาชิกที่ใช้งานอยู่แล้ว",
+    #                   subscription: {
+    #                     status: subscription.status,
+    #                     expires_at: subscription.expires_at,
+    #                   },
+    #                 }, status: :conflict
+    # end
 
-    ตรวจสอบสลิปผ่าน SlipVerifyService
+    # ตรวจสอบสลิปผ่าน SlipVerifyService
     data_verify = SlipVerifyService.verify_slip(
       slip_params[:sending_book],
       slip_params[:transaction_code]
@@ -40,7 +42,7 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
     #   "statusCode" => "0000",
     #   "message" => "ตรวจสอบสำเร็จ",
     #   "data" => {
-    #     "transRef" => "TRX123456",
+    #     "transRef" => "TRX123452",
     #     "receiver" => {
     #       "proxy" => {
     #         "value" => "1466144693",
@@ -78,7 +80,8 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
   end
 
   def subscription_conflict?(subscription)
-    subscription&.active? && subscription.days_until_expiry > 3
+    # ปัจจุบัน policy: ห้ามสมัคร/ต่ออายุ หากมีสถานะ active และเหลือวันมากกว่าค่ากำหนด
+    subscription&.active? && subscription.days_until_expiry > RENEWAL_BLOCK_THRESHOLD_DAYS
   end
 
   def validated_payment(data_verify)
@@ -119,14 +122,17 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
   def create_or_update_subscription(trans_ref)
     ActiveRecord::Base.transaction do
       subscription = current_user.subscriptions.first_or_initialize
-      if subscription.active? && subscription.expires_soon?
-        subscription.update!(
+      # ถ้า subscription มีสถานะ active และยังไม่หมดอายุ ให้ต่ออายุจาก expires_at เดิม
+      if subscription.persisted? && subscription.active? && subscription.expires_at.present? && subscription.expires_at > Time.current
+        new_expires_at = subscription.expires_at + 1.month
+        subscription.assign_attributes(
           status: :active,
-          expires_at: subscription.expires_at + 1.month,
+          expires_at: new_expires_at,
           subscribed_at: Time.current,
           payment_reference: trans_ref,
         )
       else
+        # กรณีสมัครใหม่หรือหมดอายุแล้ว ให้เริ่มจาก now
         subscription.assign_attributes(
           status: :active,
           expires_at: 1.month.from_now,
