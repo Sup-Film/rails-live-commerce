@@ -22,8 +22,7 @@ class FacebookLiveWebhooksController < ApplicationController
   # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook
   def receive
     # ดึง UID ของ user เพื่อใช้ในการดึง access token
-    # webhook_params['entry'].first['uid'] if webhook_params['entry'].present? && webhook_params['entry'].first['uid'].present?
-    uid = "2926531014188313"
+    uid = webhook_params["entry"].first["uid"] if webhook_params["entry"].present? && webhook_params["entry"].first["uid"].present?
     unless uid
       Rails.logger.warn "UID is missing in the webhook parameters."
       return render json: { error: "UID is missing" }, status: :bad_request

@@ -53,8 +53,7 @@ Rails.application.routes.draw do
   # ! เส้นทางสำหรับ API ภายใน (สำหรับ JavaScript เรียกใช้)
   namespace :api do
     namespace :v1 do
-      get "orders/submit_payment"
-      get "credits/top_up"
+      # API endpoints should be POST-only for state-changing actions
       resource :subscription, only: [] do
         post :verify_slip, on: :member # POST /api/v1/subscription/verify_slip
       end

@@ -4,11 +4,11 @@ class OmniauthCallbacksController < ApplicationController
   def facebook
     auth = request.env["omniauth.auth"]
 
-    if User.exists?(provider: auth.provider, uid: auth.uid)
+    if User.where(provider: auth.provider, uid: auth.uid).where.not(id: current_user.id).exists?
       return redirect_to profile_path, alert: "บัญชี Facebook นี้ถูกเชื่อมต่อกับผู้ใช้อื่นในระบบแล้ว"
     end
 
-    current_user.update!(
+    current_user.assign_attributes(
       provider: auth.provider,
       uid: auth.uid,
       image: auth.info.image,
@@ -18,13 +18,12 @@ class OmniauthCallbacksController < ApplicationController
 
     if current_user.changed?
       current_user.save!
+      return redirect_to profile_path, notice: "เชื่อมต่อบัญชี Facebook สำเร็จ!"
     else
-      redirect_to profile_path, notice: "บัญชีของคุณเชื่อมต่อกับ Facebook อยู่แล้ว"
+      return redirect_to profile_path, notice: "บัญชีของคุณเชื่อมต่อกับ Facebook อยู่แล้ว"
     end
-
-    redirect_to profile_path, notice: "เชื่อมต่อบัญชี Facebook สำเร็จ!"
   rescue => e
-    redirect_to profile_path, alert: "เกิดข้อผิดพลาดในการเชื่อมต่อกับ Facebook: #{e.message}"
+    return redirect_to profile_path, alert: "เกิดข้อผิดพลาดในการเชื่อมต่อกับ Facebook: #{e.message}"
   end
 
   def failure

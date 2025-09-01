@@ -68,10 +68,11 @@
   import QrScanner from "/js/qr-scanner.min.js";
 
   document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('slip-upload-form');
+    // IDs in the HTML: form id is 'slip-payment-form' and status div id is 'payment-status'
+    const form = document.getElementById('slip-payment-form');
     if (!form) return;
 
-    const statusDiv = document.getElementById('upload-status');
+    const statusDiv = document.getElementById('payment-status');
     const orderToken = form.dataset.orderToken;
     const submitButton = form.querySelector('button[type="submit"]');
     const fileInput = document.getElementById('slip-file-input'); // <-- แก้ ID ให้ตรง
@@ -79,7 +80,8 @@
     // ฟังก์ชันสำหรับเรียก API
     function submitPaymentApi(formData) {
       statusDiv.innerHTML = '<p class="text-blue-600">กำลังยืนยันข้อมูลกับเซิร์ฟเวอร์...</p>';
-      const apiUrl = `/api/v1/orders/${orderToken}/submit_payment`;
+  // append debug=1 to confirm request reaches Rails logs during testing
+  const apiUrl = `/api/v1/orders/${orderToken}/submit_payment?debug=1`;
       const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
 
       fetch(apiUrl, {
