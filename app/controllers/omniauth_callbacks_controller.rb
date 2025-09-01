@@ -18,6 +18,23 @@ class OmniauthCallbacksController < ApplicationController
 
     if current_user.changed?
       current_user.save!
+      # Sync managed pages to store Page Access Tokens for later webhook processing
+      begin
+        pages = FacebookApiService.new(current_user.oauth_token).get_pages
+        if pages.is_a?(Hash) && pages["data"].is_a?(Array)
+          pages["data"].each do |p|
+            next unless p["id"].present? && p["access_token"].present?
+            Page.find_or_initialize_by(page_id: p["id"]).tap do |page|
+              page.user = current_user
+              page.name = p["name"]
+              page.access_token = p["access_token"]
+              page.save!
+            end
+          end
+        end
+      rescue => e
+        Rails.logger.warn "Sync pages failed: #{e.message}"
+      end
       return redirect_to profile_path, notice: "เชื่อมต่อบัญชี Facebook สำเร็จ!"
     else
       return redirect_to profile_path, notice: "บัญชีของคุณเชื่อมต่อกับ Facebook อยู่แล้ว"

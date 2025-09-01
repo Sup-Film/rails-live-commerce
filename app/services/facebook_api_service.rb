@@ -9,6 +9,11 @@ class FacebookApiService
     get_resource("/me", { fields: fields })
   end
 
+  def get_pages
+    # Requires proper page permissions granted during OAuth
+    get_resource("/me/accounts", { fields: "id,name,access_token" })
+  end
+
   # def get_posts(limit = 5)
   #   get_resource("/me/feed", { limit: limit })
   # end

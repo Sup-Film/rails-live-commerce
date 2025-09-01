@@ -1,6 +1,6 @@
 class FacebookLiveWebhooksController < ApplicationController
   skip_before_action :verify_authenticity_token
-  before_action :verifyRequestSignature, only: [:receive]
+  before_action :verify_request_signature, only: [:receive]
 
   #   skip_before_action :verify_authenticity_token - ปิด CSRF token เพื่อให้ Facebook เรียกได้
   # verify method - ใช้สำหรับ Facebook webhook verification challenge
@@ -21,25 +21,25 @@ class FacebookLiveWebhooksController < ApplicationController
 
   # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook
   def receive
-    # ดึง UID ของ user เพื่อใช้ในการดึง access token
-    uid = webhook_params["entry"].first["uid"] if webhook_params["entry"].present? && webhook_params["entry"].first["uid"].present?
-    unless uid
-      Rails.logger.warn "UID is missing in the webhook parameters."
-      return render json: { error: "UID is missing" }, status: :bad_request
+    # ดึง page_id ของเพจจาก webhook แล้วแมปไปยัง Page Access Token
+    page_id = webhook_params.dig("entry", 0, "id")
+    unless page_id
+      Rails.logger.warn "page_id is missing in the webhook parameters."
+      return render json: { status: "ok" }, status: :ok
     end
 
-    user = User.find_by(uid: uid) if uid.present?
-    unless user
-      Rails.logger.warn "User not found for UID: #{uid}"
-      return render json: { error: "User not found" }, status: :not_found
+    page = Page.find_by(page_id: page_id)
+    unless page
+      Rails.logger.warn "Page not found for page_id: #{page_id}"
+      return render json: { status: "ok" }, status: :ok
     end
 
-    unless user.oauth_token
-      Rails.logger.warn "No access token found for user with UID: #{uid}"
-      return render json: { error: "Access token is missing" }, status: :unauthorized
+    unless page.access_token.present?
+      Rails.logger.warn "No page access token found for page_id: #{page_id}"
+      return render json: { status: "ok" }, status: :ok
     end
 
-    FacebookLiveWebhookService.new(webhook_params, user.oauth_token, user).process
+    FacebookLiveWebhookService.new(webhook_params, page.access_token, page.user).process
     render json: { status: "ok" }, status: :ok
   rescue StandardError => e
     Rails.logger.error "Error processing Facebook Live webhook: #{e.message}"
@@ -52,7 +52,7 @@ class FacebookLiveWebhooksController < ApplicationController
     params.permit! # รับทุก key
   end
 
-  def verifyRequestSignature
+  def verify_request_signature
     signature = request.headers["X-Hub-Signature-256"]
 
     unless signature
@@ -60,14 +60,17 @@ class FacebookLiveWebhooksController < ApplicationController
       return head :unauthorized
     end
 
-    elements = signature.split("=")
-    signature_hash = elements[1]
+    algo, signature_hash = signature.split("=", 2)
+    unless algo == "sha256" && signature_hash.present?
+      Rails.logger.warn "Invalid signature format."
+      return head :unauthorized
+    end
 
     body = request.body.read
 
-    expected_hash = OpenSSL::HMAC.hexdigest("sha256", ENV["FACEBOOK_APP_SECRET"], body)
+    expected_hash = OpenSSL::HMAC.hexdigest("sha256", ENV["FACEBOOK_APP_SECRET"].to_s, body)
 
-    unless signature_hash == expected_hash
+    unless ActiveSupport::SecurityUtils.secure_compare(signature_hash, expected_hash)
       Rails.logger.error "Couldn't validate the request signature."
       return head :unauthorized
     end
