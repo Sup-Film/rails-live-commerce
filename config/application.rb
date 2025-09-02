@@ -28,5 +28,8 @@ module RailsFacebookApiNew
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Enable Rack::Attack middleware for throttling and basic abuse protection
+    config.middleware.use Rack::Attack
   end
 end

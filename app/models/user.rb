@@ -2,21 +2,23 @@
 #
 # Table name: users
 #
-#  id                  :bigint           not null, primary key
-#  bank_account_name   :string
-#  bank_account_number :string
-#  bank_code           :string
-#  email               :string           not null
-#  image               :string
-#  name                :string
-#  oauth_expires_at    :datetime
-#  oauth_token         :string
-#  password_digest     :string
-#  provider            :string
-#  role                :integer          default("user"), not null
-#  uid                 :string
-#  created_at          :datetime         not null
-#  updated_at          :datetime         not null
+#  id                     :bigint           not null, primary key
+#  bank_account_name      :string
+#  bank_account_number    :string
+#  bank_code              :string
+#  email                  :string           not null
+#  image                  :string
+#  name                   :string
+#  oauth_expires_at       :datetime
+#  oauth_token            :string
+#  password_digest        :string
+#  provider               :string
+#  reset_password_sent_at :datetime
+#  reset_password_token   :string
+#  role                   :integer          default("user"), not null
+#  uid                    :string
+#  created_at             :datetime         not null
+#  updated_at             :datetime         not null
 #
 # Indexes
 #
@@ -94,4 +96,26 @@ class User < ApplicationRecord
   validates :bank_account_number, presence: true, length: { in: 10..12 }, numericality: { only_integer: true }, allow_blank: true
   validates :bank_account_name, presence: true, allow_blank: true
   validates :bank_code, inclusion: { in: BANK_CODES.values }, allow_blank: true
+
+  # Password Reset Methods
+  def generate_password_reset_token!
+    self.reset_password_token = SecureRandom.urlsafe_base64(32)
+    self.reset_password_sent_at = Time.current
+    save!(validate: false)
+  end
+
+  def password_reset_token_expired?
+    reset_password_sent_at < 2.hours.ago
+  end
+
+  def reset_password!(new_password)
+    self.password = new_password
+    self.reset_password_token = nil
+    self.reset_password_sent_at = nil
+    save!
+  end
+
+  def self.find_by_password_reset_token(token)
+    where(reset_password_token: token).where('reset_password_sent_at > ?', 2.hours.ago).first
+  end
 end

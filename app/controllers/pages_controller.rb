@@ -10,7 +10,7 @@ class PagesController < ApplicationController
 
   def require_login
     unless user_signed_in?
-      redirect_to new_user_session_path, alert: "กรุณาเข้าสู่ระบบก่อนดำเนินการ."
+      redirect_to login_path, alert: "กรุณาเข้าสู่ระบบก่อนดำเนินการ."
     end
   end
 end

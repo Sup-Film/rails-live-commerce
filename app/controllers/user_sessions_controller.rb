@@ -1,5 +1,4 @@
 class UserSessionsController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: :create
 
   def new
     if cookies[:flash_alert] == "too_many_attempts"
@@ -9,8 +8,9 @@ class UserSessionsController < ApplicationController
   end
 
   def create
-    user = User.find_by(email: params[:session][:email])
-    if user&.authenticate(params[:session][:password])
+    email = login_params[:email].to_s.downcase.strip
+    user = User.find_by(email: email)
+    if user&.authenticate(login_params[:password])
       log_in(user)
       redirect_to root_path, notice: "เข้าสู่ระบบสำเร็จ! ยินดีต้อนรับ #{user.name} 🎉"
     else
@@ -21,7 +21,7 @@ class UserSessionsController < ApplicationController
 
   def destroy
     user_name = current_user&.name
-    session[:user_id] = nil
+    reset_session
 
     if user_name
       redirect_to root_path, notice: "ออกจากระบบเรียบร้อยแล้ว! แล้วพบกันใหม่ #{user_name} 👋"
@@ -35,5 +35,9 @@ class UserSessionsController < ApplicationController
   def log_in(user)
     reset_session
     session[:user_id] = user.id
+  end
+
+  def login_params
+    params.require(:session).permit(:email, :password)
   end
 end

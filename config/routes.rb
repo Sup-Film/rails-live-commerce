@@ -18,6 +18,9 @@ Rails.application.routes.draw do
   post "login", to: "user_sessions#create"
   delete "logout", to: "user_sessions#destroy"
 
+  # Password Reset routes
+  resources :password_resets, only: [:new, :create, :show, :update]
+
   # ! เส้นทางสำหรับฟีเจอร์หลักของแอปพลิเคชัน
   resource :dashboard, only: [:show] # ใช้ resource (เอกพจน์) เพราะผู้ใช้มีได้แค่ dashboard เดียว
   resources :products

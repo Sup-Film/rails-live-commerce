@@ -41,6 +41,22 @@ Rails.application.configure do
 
   config.action_mailer.perform_caching = false
 
+  # Action Mailer URL options for generating links in emails
+  if ENV['APP_HOST'].present?
+    config.action_mailer.default_url_options = {
+      host: ENV['APP_HOST'],
+      protocol: ENV['APP_PROTOCOL'].presence || 'https'
+    }
+  else
+    config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  end
+  # Ensure deliveries are attempted in development when a delivery method is configured
+  config.action_mailer.perform_deliveries = true
+  
+  # Use letter_opener to preview emails in browser during development
+  config.action_mailer.delivery_method = :letter_opener
+  config.action_mailer.perform_deliveries = true
+
   # Print deprecation notices to the Rails logger.
   config.active_support.deprecation = :log
 

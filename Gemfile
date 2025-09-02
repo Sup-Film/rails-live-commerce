@@ -84,6 +84,9 @@ group :development do
   gem 'annotate'
   gem 'lograge'
   gem 'htmlbeautifier'
+  
+  # Preview emails in browser during development
+  gem 'letter_opener'
 end
 
 group :test do

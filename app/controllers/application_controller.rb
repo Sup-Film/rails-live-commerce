@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   helper_method :current_user, :user_signed_in?, :check_active_subscription?
+  before_action :enforce_session_timeout
 
   # จัดการ OmniAuth errors
   rescue_from OmniAuth::Strategies::Facebook::NoAuthorizationCodeError do |exception|
@@ -22,5 +23,22 @@ class ApplicationController < ActionController::Base
 
   def check_active_subscription?
     current_user&.current_subscription&.active?
+  end
+
+  private
+
+  # บังคับให้ session หมดอายุเมื่อไม่มีการใช้งาน 30 นาที
+  def enforce_session_timeout
+    return unless user_signed_in?
+
+    now = Time.current.to_i
+    last_seen = session[:last_seen_at].to_i
+
+    if last_seen.positive? && (now - last_seen) > 30.minutes.to_i
+      reset_session
+      redirect_to login_path, alert: "เซสชันหมดเวลา กรุณาเข้าสู่ระบบใหม่" and return
+    end
+
+    session[:last_seen_at] = now
   end
 end
