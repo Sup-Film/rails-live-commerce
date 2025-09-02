@@ -101,22 +101,22 @@ class FacebookLiveCommentService
     puts JSON.pretty_generate(data)
     puts "---------------------"
 
-    # ในอนาคตจะเปลี่ยนไปใช้การเรียก service
+    # TODO: ต้องแทนที่ด้วย SkyboxService เพื่อเช็คราคาขนส่ง
     shipping_cost_cents = 5000
     insufficient_credit = !@user.has_sufficient_credit?(shipping_cost_cents)
 
     if insufficient_credit
       puts "\e[31m[เครดิตไม่เพียงพอกรุณาเติมเครดิต] ต้องการ: #{shipping_cost_cents}, มีอยู่: #{@user.credit_balance_cents}\e[0m"
       # ส่งอีเมลแจ้งเตือน (ทำงานใน Background)
-      # SellerMailer.insufficient_credit_notification(
-      #   user: @user,
-      #   order_details: {
-      #     customer_name: data.dig(:from, :name),
-      #     product_name: product.productName,
-      #     product_code: product.productCode,
-      #   },
-      #   required_credit: shipping_cost_cents,
-      # ).deliver_later
+      SellerMailer.insufficient_credit_notification(
+        user: @user,
+        order_details: {
+          customer_name: data.dig(:from, :name),
+          product_name: product.productName,
+          product_code: product.productCode,
+        },
+        required_credit: shipping_cost_cents,
+      ).deliver_later
     end
 
     # รวมออเดอร์ที่ถูกพักไว้ด้วย เพื่อกันการสร้างซ้ำในกรณีเครดิตไม่พอ

@@ -17,17 +17,13 @@ class CheckoutController < ApplicationController
                   notice: "คำสั่งซื้อนี้อยู่ในสถานะ: #{@order.status}"
       return
     end
-
-    # ถ้า status เป็น pending จะแสดงฟอร์มให้กรอกข้อมูล
-    # Rails จะ render app/views/checkout/show.html.erb โดยอัตโนมัติ
-    # พร้อมส่ง @order ไปให้ view ใช้งาน
   end
 
   def update
     @order.assign_attributes(order_params)
 
     # คำนวณราคาขนส่งจากการเรียกใช้ 3rd party skybox
-    # shipping_cost = SkyboxService.calculate_shipping_cost(@order)
+    # TODO: ต้องแทนที่ด้วย SkyboxService เพื่อเช็คราคาขนส่ง
     shipping_cost_cents = 5000 # สมมุติค่าส่ง
 
     seller = @order.user
@@ -45,16 +41,17 @@ class CheckoutController < ApplicationController
       @order.status = :on_hold_insufficient_credit
       @order.save(validate: false) # ต้องข้าม validation บางอย่างถ้ามี
 
+      # TODO: เปิดเมลแจ้งเตือนไปยังผู้ขาย
       # แจ้งเตือนไปยังผู้ขาย
-      # SellerMailer.insufficient_credit_notification(
-      #   user: @user,
-      #   order_details: {
-      #     customer_name: @order.customer_name,
-      #     product_name: @order.product&.productName || @order.product&.name,
-      #     product_code: @order.product&.productCode || @order.product&.code,
-      #   },
-      #   required_credit: shipping_cost_cents,
-      # ).deliver_later
+      SellerMailer.insufficient_credit_notification(
+        user: @user,
+        order_details: {
+          customer_name: @order.customer_name,
+          product_name: @order.product&.productName || @order.product&.name,
+          product_code: @order.product&.productCode || @order.product&.code,
+        },
+        required_credit: shipping_cost_cents,
+      ).deliver_later
 
       # 5. แสดงหน้าพักออเดอร์ให้ผู้ซื้อเห็น
       redirect_to checkout_on_hold_path(@order.checkout_token)
@@ -118,13 +115,13 @@ class CheckoutController < ApplicationController
       :customer_email, :customer_address, :notes
     )
   end
-  
+
   # Helper method เพื่อหา path ที่ถูกต้องตามสถานะของ order
   def appropriate_checkout_path
     case @order.status
-    when 'on_hold_insufficient_credit'
+    when "on_hold_insufficient_credit"
       checkout_on_hold_path(@order.checkout_token)
-    when 'pending'
+    when "pending"
       checkout_path(@order.checkout_token)
     else
       checkout_confirmation_path(@order.checkout_token)

@@ -68,7 +68,6 @@ class Api::V1::OrdersController < Api::V1::BaseController
     raise "ผู้ขายยังไม่ได้ตั้งค่าบัญชีรับเงิน" if expected_receiver.blank?
     raise "บัญชีผู้รับเงินไม่ถูกต้อง" unless receiver_bank_no.present? && receiver_bank_no == expected_receiver
 
-    # 4) (ทางเลือก) ตรวจธนาคาร ถ้ามีข้อมูล
     receiver_bank_code = extract_receiver_bank_code(data)
     expected_bank_code = order.user.bank_code.to_s
     raise "ผู้ขายยังไม่ได้ตั้งรหัสธนาคาร" if expected_bank_code.blank?
@@ -84,7 +83,8 @@ class Api::V1::OrdersController < Api::V1::BaseController
       payment.update!(status: "verified", external_ref: trans_ref, verified_at: Time.current)
 
       seller = order.user
-      shipping_cost_cents = 5000 # TODO: Replace with ShippingService or config
+      # TODO: ต้องแทนที่ด้วย SkyboxService เพื่อเช็คราคาขนส่ง
+      shipping_cost_cents = 5000 
 
       CreditService.debit(
         user: seller,

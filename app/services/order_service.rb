@@ -43,15 +43,15 @@ class OrderService
       )
     end
 
-    # เปลี่ยนสถานะเป็น completed
-    # def complete_order(order, payment_info = {})
-    #   return false unless order.present? && order.pending?
+    เปลี่ยนสถานะเป็น completed
+    def complete_order(order, payment_info = {})
+      return false unless order.present? && order.pending?
 
-    #   order.update(
-    #     status: "completed",
-    #     completed_at: Time.current,
-    #     payment_info: payment_info,
-    #   )
-    # end
+      order.update(
+        status: "completed",
+        completed_at: Time.current,
+        payment_info: payment_info,
+      )
+    end
   end
 end

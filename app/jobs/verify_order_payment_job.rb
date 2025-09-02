@@ -64,7 +64,8 @@ class VerifyOrderPaymentJob < ApplicationJob
 
     # หักเครดิตผู้ขาย (เรียกใช้ Logic เดิมที่เราทำไว้)
     seller = order.user
-    shipping_cost_cents = 5000 # TODO: Replace with ShippingService
+    # TODO: ต้องแทนที่ด้วย SkyboxService เพื่อเช็คราคาขนส่ง
+    shipping_cost_cents = 5000
 
     CreditService.debit(
       user: seller,

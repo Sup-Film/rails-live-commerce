@@ -21,7 +21,7 @@ class ProcessHeldOrdersJob < ApplicationJob
   private
 
   def process_held_order(order, user)
-    # จะต้องแทนที่ด้วยการเรียกใช้ service สำหรับคำนวณค่าขนส่ง
+    # TODO: ต้องแทนที่ด้วย SkyboxService เพื่อเช็คราคาขนส่ง
     shipping_cost_cents = 5000
 
     # ตรวจสอบเครดิตอีกครั้งด้วยยอดเงินล่าสุด
