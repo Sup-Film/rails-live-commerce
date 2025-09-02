@@ -3,9 +3,23 @@ class FacebookLiveCommentService
     @live_id = live_id
     @access_token = access_token
     @user = user # ใช้สำหรับหา Merchant ในการสร้าง Order
+
+    # Log เริ่มต้น service
+    ApplicationLogger.business_event("facebook_live_comment_service_initialized", {
+      live_id: @live_id,
+      user_id: @user&.id,
+      has_access_token: @access_token.present?,
+    })
   end
 
   def fetch_comments
+    start_time = Time.current
+
+    ApplicationLogger.info("Starting to fetch comments", {
+      live_id: @live_id,
+      user_id: @user&.id,
+    })
+
     unless @user
       puts "\e[31m[ไม่พบ User (merchant)]\e[0m"
       return []
@@ -16,54 +30,88 @@ class FacebookLiveCommentService
       return []
     end
 
-    # url = "https://streaming-graph.facebook.com/#{live_id}/live_comments?access_token=#{@access_token}&comment_rate=one_per_two_seconds&fields=from{name,id},message',created_time"
-    # response = HTTParty.get(url)
-    # if response.success?
-    # comments = response.parsed_response["data"] || [] # ถ้ามีข้อมูลใน 'data' ให้ใช้ ถ้าไม่มีก็ใช้เป็น Array ว่าง
-    # Rails.logger.info "Fetched #{comments.size} comments for Facebook Live ID: #{@live_id}"
+    url = "https://streaming-graph.facebook.com/#{@live_id}/live_comments?access_token=#{@access_token}&comment_rate=one_per_two_seconds&fields=from{id,name},message,created_time"
+    response = HTTParty.get(url)
 
-    # Mock response data for testing
-    comments = [
-      # สร้าง comment สำหรับ productCode 1
-      *Array.new(2) { |i| { "id" => "c1_#{i}", "message" => "CF 1", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user#{i}", "name" => "User #{i}" } } },
-      # สร้าง comment สำหรับ productCode 2
-      *Array.new(2) { |i| { "id" => "c2_#{i}", "message" => "CF 2", "created_time" => "2023-10-01T12:01:00+0000", "from" => { "id" => "user#{i + 2}", "name" => "User #{i + 2}" } } },
-      # สร้าง comment สำหรับ productCode 3
-      *Array.new(2) { |i| { "id" => "c3_#{i}", "message" => "CF 3", "created_time" => "2023-10-01T12:02:00+0000", "from" => { "id" => "user#{i + 10}", "name" => "User #{i + 10}" } } },
-      # สร้าง comment สำหรับ productCode 12342
-      *Array.new(2) { |i| { "id" => "c4#{i}", "message" => "CF 4", "created_time" => "2023-10-01T12:03:00+0000", "from" => { "id" => "user#{i + 12}", "name" => "User #{i + 12}" } } },
-    ].flatten
+    if response.success?
+      # TODO: Mock response data for testing
+      comments = [
+        # สร้าง comment สำหรับ productCode 1
+        *Array.new(2) { |i| { "id" => "c1_#{i}", "message" => "CF 1", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user#{i}", "name" => "User #{i}" } } },
+        # สร้าง comment สำหรับ productCode 2
+        *Array.new(2) { |i| { "id" => "c2_#{i}", "message" => "CF 2", "created_time" => "2023-10-01T12:01:00+0000", "from" => { "id" => "user#{i + 2}", "name" => "User #{i + 2}" } } },
+        # สร้าง comment สำหรับ productCode 3
+        *Array.new(2) { |i| { "id" => "c3_#{i}", "message" => "CF 3", "created_time" => "2023-10-01T12:02:00+0000", "from" => { "id" => "user#{i + 10}", "name" => "User #{i + 10}" } } },
+        # สร้าง comment สำหรับ productCode 12342
+        *Array.new(2) { |i| { "id" => "c4#{i}", "message" => "CF 4", "created_time" => "2023-10-01T12:03:00+0000", "from" => { "id" => "user#{i + 12}", "name" => "User #{i + 12}" } } },
+      ].flatten
 
-    # นำข้อมูลใน comment มาวนลูป และทำการสร้าง Hash ใหม่สำหรับแต่ละ comment
-    created_orders = []
-    comments.each do |comment|
-      comment_data = {
-        id: comment["id"],
-        message: comment["message"],
-        created_time: comment["created_time"],
-        from: comment["from"] ? {
-          id: comment["from"]["id"],
-          name: comment["from"]["name"],
-        } : nil,
-      }
+      comments = response.parsed_response.dig("data") || []
+      duration = ((Time.current - start_time) * 1000).round(2)
 
-      cf_result = create_order(comment_data)
-      created_orders << cf_result if cf_result.present?
+      ApplicationLogger.performance("fetch_facebook_comments", duration, {
+        live_id: @live_id,
+        comments_count: comments.size,
+        user_id: @user.id,
+      })
+
+      # นำข้อมูลใน comment มาวนลูป และทำการสร้าง Hash ใหม่สำหรับแต่ละ comment
+      created_orders = []
+      comments.each do |comment|
+        comment_data = {
+          id: comment["id"],
+          message: comment["message"],
+          created_time: comment["created_time"],
+          from: comment["from"] ? {
+            id: comment["from"]["id"],
+            name: comment["from"]["name"],
+          } : nil,
+        }
+
+        cf_result = create_order(comment_data)
+        created_orders << cf_result if cf_result.present?
+      end
+      created_orders
+    else
+      ApplicationLogger.error("Failed to fetch Facebook comments", {
+        live_id: @live_id,
+        status_code: response.code,
+        error_body: response.body,
+        user_id: @user.id,
+      })
+      []
     end
-    created_orders
   rescue StandardError => e
-    Rails.logger.error("Failed to fetch comments for Facebook Live: #{@live_id}, Error: #{e.message}")
+    duration = ((Time.current - start_time) * 1000).round(2)
+    ApplicationLogger.error("Exception in fetch_comments", {
+      live_id: @live_id,
+      user_id: @user&.id,
+      duration_ms: duration,
+      error_class: e.class.name,
+      error_message: e.message,
+      backtrace: e.backtrace&.first(5),
+    })
     []
   end
 
   def create_order(data)
+    ApplicationLogger.debug("Attempting to create order", {
+      comment_id: data[:id],
+      product_codes: data[:product_codes],
+      user_id: @user&.id,
+    })
+
     message = data[:message].to_s
 
     # ดึงรหัสสินค้า, กำจัด nil, แปลงเป็น string และ normalize ให้เป็น lowercase
     product_codes = Product.active.where(user_id: @user.id).pluck(:productCode).compact.map { |c| c.to_s.strip.downcase }.uniq
 
     if product_codes.empty?
-      puts "\e[31m[Merchant ไม่มีสินค้าเลย] User ID: #{@user.id}\e[0m"
+      ApplicationLogger.warn("Product not found for comment", {
+        comment_id: data[:id],
+        product_codes: product_codes,
+        user_id: @user&.id,
+      })
       return nil
     end
 
@@ -73,14 +121,13 @@ class FacebookLiveCommentService
     # normalize ข้อความเพื่อตรวจ (lowercase)
     message_norm = message.downcase
 
-    # ใช้ word-boundary regex เพื่อแมตช์เป็นคำหรือ token แยก (ลด false positives)
-    found_code = product_codes.find do |code|
-      regex = /\b#{Regexp.escape(code)}\b/
-      message_norm.match?(regex)
-    end
-
+    # แยก parser ออกเป็นเมธอด เพื่อลด false positives และทดสอบง่าย
+    found_code = parse_product_code(message_norm, product_codes)
     unless found_code
-      puts "\e[31m[ไม่พบสินค้าในข้อความ] Product codes: #{product_codes.join(", ")}\e[0m"
+      ApplicationLogger.warn("Product not found in message", {
+        comment_id: data[:id],
+        user_id: @user&.id,
+      })
       return nil
     end
 
@@ -106,29 +153,32 @@ class FacebookLiveCommentService
     insufficient_credit = !@user.has_sufficient_credit?(shipping_cost_cents)
 
     if insufficient_credit
-      puts "\e[31m[เครดิตไม่เพียงพอกรุณาเติมเครดิต] ต้องการ: #{shipping_cost_cents}, มีอยู่: #{@user.credit_balance_cents}\e[0m"
-      # ส่งอีเมลแจ้งเตือน (ทำงานใน Background)
-      SellerMailer.insufficient_credit_notification(
+      ApplicationLogger.warn("credit.insufficient", {
+        required_credit_cents: shipping_cost_cents,
+        current_balance_cents: @user.credit_balance_cents,
+        user_id: @user.id,
+      })
+      # ส่งอีเมลแจ้งเตือนแบบ throttle เพื่อป้องกันสแปม
+      notify_insufficient_credit_once(
         user: @user,
-        order_details: {
-          customer_name: data.dig(:from, :name),
-          product_name: product.productName,
-          product_code: product.productCode,
-        },
-        required_credit: shipping_cost_cents,
-      ).deliver_later
+        product: product,
+        from: data[:from],
+        required_credit_cents: shipping_cost_cents,
+      )
     end
 
     # รวมออเดอร์ที่ถูกพักไว้ด้วย เพื่อกันการสร้างซ้ำในกรณีเครดิตไม่พอ
-    existing_order = Order.where(deleted_at: nil, status: [
-                                  Order.statuses[:pending],
-                                  Order.statuses[:paid],
-                                  Order.statuses[:on_hold_insufficient_credit],
-                                ]).find_by(
-      facebook_user_id: data[:from][:id],
-      order_number: found_code,
-      user: @user,
-    )
+    # กันซ้ำ: บล็อกสถานะที่ยัง active (pending, on_hold_insufficient_credit) เสมอ
+    # และถ้าจ่ายแล้ว อนุญาตสั่งซ้ำหลังเวลาผ่านไป (เช่น 30 นาที)
+    duplicate_time_window = 30.minutes.ago
+    existing_order = Order.where(deleted_at: nil)
+                          .where(user: @user, order_number: found_code, facebook_user_id: data.dig(:from, :id))
+                          .where(
+                            "status IN (:strict_statuses) OR (status = :paid AND created_at > :since)",
+                            strict_statuses: [Order.statuses[:pending], Order.statuses[:on_hold_insufficient_credit]],
+                            paid: Order.statuses[:paid],
+                            since: duplicate_time_window,
+                          ).first
 
     if existing_order
       puts "\e[33m[พบออเดอร์เดิมแล้ว] Comment #{data[:id]} -> Order: #{existing_order.order_number}\e[0m"
@@ -156,19 +206,73 @@ class FacebookLiveCommentService
         comment_time: Time.parse(data[:created_time]),
       )
 
-      puts "\e[32m[สร้างออเดอร์สำเร็จ] Order: #{order.order_number} (status: #{order.status})\e[0m"
+      ApplicationLogger.info("order.create.success", {
+        order_id: order.id,
+        order_number: order.order_number,
+        status: order.status,
+      })
       return order
     rescue ActiveRecord::RecordInvalid => e
-      puts "\e[31m[สร้างออเดอร์ไม่สำเร็จ] Validation failed: #{e.message}\e[0m"
-      puts "\e[31mValidation errors: #{e.record.errors.full_messages}\e[0m"
+      ApplicationLogger.error("order.create.failed", {
+        error_class: e.class.name,
+        error_message: e.message,
+        validation_errors: e.record.errors.full_messages,
+      })
       return nil
     rescue StandardError => e
-      puts "\e[31m[Unexpected error creating order] #{e.message}\e[0m"
+      ApplicationLogger.error("order.create.unexpected_error", {
+        error_class: e.class.name,
+        error_message: e.message,
+      })
       return nil
     end
   end
 
   private
+
+  # Parser สำหรับข้อความ CF: รองรับ CF123, CF 123, CF-123, CF:123, CF_123, CF/123
+  # พยายามจับ "CF <digits>" ก่อน แล้วค่อย fallback เป็นการค้นหาด้วย word-boundary
+  def parse_product_code(message_norm, product_codes)
+    sorted = product_codes.sort_by { |c| -c.length }
+
+    # จับรูปแบบ CF123, CF 123, CF-123, CF:123, CF_123, CF/123
+    if (m = message_norm.match(/(?:^|\s)cf[\s:\-_/]*([0-9]{1,10})(?=\D|$)/i))
+      candidate = m[1].to_s
+      return candidate if sorted.include?(candidate)
+    end
+
+    # สำรอง: เจอรหัสสินค้าเป็นคำเดี่ยวในข้อความ (ยาวก่อน ป้องกัน substring)
+    sorted.find do |code|
+      message_norm.match?(/\b#{Regexp.escape(code)}\b/)
+    end
+  end
+
+  # ส่งอีเมลเตือนเครดิตไม่พอแบบ throttle (จำกัด 1 ครั้ง/ผู้ขาย/30 นาที)
+  def notify_insufficient_credit_once(user:, product:, from:, required_credit_cents:)
+    cache_key = "insufficient_credit_notified:user:#{user.id}"
+    return false if Rails.cache.exist?(cache_key)
+
+    SellerMailer.insufficient_credit_notification(
+      user: user,
+      order_details: {
+        customer_name: from&.dig(:name),
+        product_name: product.productName,
+        product_code: product.productCode,
+      },
+      required_credit: required_credit_cents,
+    ).deliver_later
+
+    Rails.cache.write(cache_key, true, expires_in: 30.minutes)
+    ApplicationLogger.info("credit.insufficient.email_sent", { user_id: user.id })
+    true
+  rescue => e
+    ApplicationLogger.error("credit.insufficient.email_error", {
+      error_class: e.class.name,
+      error_message: e.message,
+      user_id: user.id,
+    })
+    false
+  end
 
   #   def send_checkout_link(order)
   #     checkout_url = order.checkout_url
