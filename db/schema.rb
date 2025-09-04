@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_04_035446) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_04_064115) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -59,6 +59,19 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_04_035446) do
     t.index ["user_id"], name: "index_credit_ledgers_on_user_id"
   end
 
+  create_table "instagram_media", force: :cascade do |t|
+    t.string "instagram_media_id"
+    t.string "media_type"
+    t.text "caption"
+    t.string "media_url"
+    t.string "permalink"
+    t.datetime "timestamp"
+    t.bigint "user_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_instagram_media_on_user_id"
+  end
+
   create_table "orders", force: :cascade do |t|
     t.string "order_number", null: false
     t.integer "status", default: 0
@@ -105,6 +118,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_04_035446) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "instagram_business_account_id"
     t.index ["page_id"], name: "index_pages_on_page_id", unique: true
     t.index ["user_id"], name: "index_pages_on_user_id"
   end
@@ -189,6 +203,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_04_035446) do
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.bigint "default_shipping_provider_id"
+    t.string "instagram_user_id"
+    t.string "instagram_username"
     t.index ["default_shipping_provider_id"], name: "index_users_on_default_shipping_provider_id"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
@@ -196,6 +212,7 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_04_035446) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "credit_ledgers", "users"
+  add_foreign_key "instagram_media", "users"
   add_foreign_key "orders", "products"
   add_foreign_key "orders", "users"
   add_foreign_key "pages", "users"

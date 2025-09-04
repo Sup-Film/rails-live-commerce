@@ -8,6 +8,7 @@
 #  bank_code                    :string
 #  email                        :string           not null
 #  image                        :string
+#  instagram_username           :string
 #  name                         :string
 #  oauth_expires_at             :datetime
 #  oauth_token                  :string
@@ -20,6 +21,7 @@
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  default_shipping_provider_id :bigint
+#  instagram_user_id            :string
 #
 # Indexes
 #
@@ -56,6 +58,11 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :credit_ledgers, -> { order(created_at: :asc) }
   belongs_to :default_shipping_provider, class_name: "ShippingProvider", optional: true
+
+  # Instagram methods
+  def has_instagram_connected?
+    instagram_user_id.present?
+  end
 
   # Bank code
   def bank_name

@@ -2,14 +2,15 @@
 #
 # Table name: pages
 #
-#  id               :bigint           not null, primary key
-#  access_token     :text             not null
-#  name             :string
-#  token_expires_at :datetime
-#  created_at       :datetime         not null
-#  updated_at       :datetime         not null
-#  page_id          :string           not null
-#  user_id          :bigint           not null
+#  id                            :bigint           not null, primary key
+#  access_token                  :text             not null
+#  name                          :string
+#  token_expires_at              :datetime
+#  created_at                    :datetime         not null
+#  updated_at                    :datetime         not null
+#  instagram_business_account_id :string
+#  page_id                       :string           not null
+#  user_id                       :bigint           not null
 #
 # Indexes
 #

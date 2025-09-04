@@ -31,6 +31,9 @@ class OmniauthCallbacksController < ApplicationController
               page.save!
             end
           end
+          
+          # Sync Instagram Business Accounts
+          sync_instagram_accounts(pages["data"])
         end
       rescue => e
         Rails.logger.warn "Sync pages failed: #{e.message}"
@@ -59,6 +62,38 @@ class OmniauthCallbacksController < ApplicationController
   end
 
   private
+
+  def sync_instagram_accounts(pages_data)
+    pages_data.each do |page|
+      next unless page["access_token"].present?
+      
+      begin
+        # Get Instagram Business Account connected to this page
+        ig_response = FacebookApiService.new(page["access_token"]).get_instagram_account(page["id"])
+        
+        if ig_response&.dig("instagram_business_account", "id")
+          ig_account_id = ig_response["instagram_business_account"]["id"]
+          ig_username = ig_response.dig("instagram_business_account", "username")
+          
+          # อัปเดต User
+          current_user.update!(
+            instagram_user_id: ig_account_id,
+            instagram_username: ig_username
+          )
+          
+          # อัปเดต Page ที่เชื่อมกับ IG account นี้
+          page_record = Page.find_by(page_id: page["id"])
+          if page_record
+            page_record.update!(instagram_business_account_id: ig_account_id)
+          end
+          
+          break # เอาแค่ IG account แรกที่เจอ
+        end
+      rescue => e
+        Rails.logger.warn "Failed to sync Instagram for page #{page['id']}: #{e.message}"
+      end
+    end
+  end
 
   def require_login
     unless user_signed_in?

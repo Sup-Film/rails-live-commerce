@@ -14,7 +14,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     # URL ที่จะให้ Facebook ส่ง code กลับมา (ต้องตรงกับที่ตั้งใน Facebook Developer)
     callback_url: ENV["FACEBOOK_CALLBACK_URL"] || "http://localhost:3000/auth/facebook/callback",
     # กำหนดให้ใช้ HTTPS สำหรับการเชื่อมต่อ
-    scope: "email,pages_manage_engagement,pages_manage_metadata,pages_read_engagement,pages_show_list",
+    scope: "email,pages_manage_engagement,pages_manage_metadata,pages_read_engagement,pages_show_list,instagram_basic,instagram_manage_insights,instagram_content_publish",
     # ชนิดข้อมูลที่ต้องการ
     info_fields: "email,name,first_name,last_name,picture",
     # ใช้ HTTPS สำหรับรูปภาพ

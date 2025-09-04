@@ -19,27 +19,45 @@ class FacebookLiveWebhooksController < ApplicationController
     end
   end
 
-  # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook
+  # POST endpoint สำหรับรับข้อมูล Live events จาก Facebook และ Instagram
   def receive
-    # ดึง page_id ของเพจจาก webhook แล้วแมปไปยัง Page Access Token
-    page_id = webhook_params.dig("entry", 0, "id")
-    unless page_id
-      Rails.logger.warn "page_id is missing in the webhook parameters."
+    # ดึง entry_id จาก webhook - อาจเป็น page_id (Facebook) หรือ instagram_business_account_id (Instagram)
+    entry_id = webhook_params.dig("entry", 0, "id")
+    object_type = webhook_params["object"]
+    
+    unless entry_id
+      Rails.logger.warn "entry_id is missing in the webhook parameters."
       return render json: { status: "ok" }, status: :ok
     end
 
-    page = Page.find_by(page_id: page_id)
+    # หา Page ตาม object type
+    page = if object_type == "instagram"
+      # สำหรับ Instagram: หา page ที่มี instagram_business_account_id ตรงกับ entry_id
+      Page.find_by(instagram_business_account_id: entry_id) || 
+      Page.joins(:user).where(users: { instagram_user_id: entry_id }).first
+    else
+      # สำหรับ Facebook: ใช้ page_id เหมือนเดิม
+      Page.find_by(page_id: entry_id)
+    end
+    
     unless page
-      Rails.logger.warn "Page not found for page_id: #{page_id}"
+      Rails.logger.warn "Page not found for entry_id: #{entry_id}, object: #{object_type}"
       return render json: { status: "ok" }, status: :ok
     end
 
     unless page.access_token.present?
-      Rails.logger.warn "No page access token found for page_id: #{page_id}"
+      Rails.logger.warn "No page access token found for entry_id: #{entry_id}, object: #{object_type}"
       return render json: { status: "ok" }, status: :ok
     end
 
-    FacebookLiveWebhookService.new(webhook_params, page.access_token, page.user).process
+    # ส่งไปยัง service ที่เหมาะสม
+    if object_type == "instagram"
+      Rails.logger.info "Processing Instagram Live webhook for entry_id: #{entry_id}"
+      InstagramLiveWebhookService.new(webhook_params, page.access_token, page.user).process
+    else
+      Rails.logger.info "Processing Facebook webhook for entry_id: #{entry_id}"
+      FacebookLiveWebhookService.new(webhook_params, page.access_token, page.user).process
+    end
     render json: { status: "ok" }, status: :ok
   rescue StandardError => e
     Rails.logger.error "Error processing Facebook Live webhook: #{e.message}"

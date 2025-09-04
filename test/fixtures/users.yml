@@ -8,6 +8,7 @@
 #  bank_code                    :string
 #  email                        :string           not null
 #  image                        :string
+#  instagram_username           :string
 #  name                         :string
 #  oauth_expires_at             :datetime
 #  oauth_token                  :string
@@ -20,6 +21,7 @@
 #  created_at                   :datetime         not null
 #  updated_at                   :datetime         not null
 #  default_shipping_provider_id :bigint
+#  instagram_user_id            :string
 #
 # Indexes
 #

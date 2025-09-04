@@ -41,7 +41,6 @@ class CheckoutController < ApplicationController
       @order.status = :on_hold_insufficient_credit
       @order.save(validate: false) # ต้องข้าม validation บางอย่างถ้ามี
 
-      # TODO: เปิดเมลแจ้งเตือนไปยังผู้ขาย
       # แจ้งเตือนไปยังผู้ขาย
       SellerMailer.insufficient_credit_notification(
         user: @user,

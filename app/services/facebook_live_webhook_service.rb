@@ -12,7 +12,6 @@ class FacebookLiveWebhookService
   def process
     return unless data["entry"] # ตรวจสอบว่ามีข้อมูล entry หรือไม่
 
-    # ตรวจสอบว่า data มี key 'entry' และเป็น Array หรือไม่
     data["entry"].each do |entry|
       # Rails.logger.info "Processing entry: #{entry.inspect}"
       process_entry(entry)
@@ -40,24 +39,12 @@ class FacebookLiveWebhookService
     case value["status"]
     when "live"
       handle_live_started(value)
-    when "live_stopped"
-      handle_live_ended(value)
-    when "vod"
-      # handle_live_to_vod(value)
     end
   end
 
   def handle_live_started(value)
     # FacebookLiveProcessor.new(value).process_live_start
     FacebookLiveCommentService.new(value["id"], access_token, user).fetch_comments
-  end
-
-  def handle_live_ended(value)
-    # FacebookLiveProcessor.new(value).process_live_end
-    FacebookLiveCommentService.new(value["id"], access_token, user).fetch_comments
-  end
-
-  def handle_live_to_vod(value)
   end
 end
 
