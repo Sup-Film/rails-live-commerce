@@ -2,27 +2,33 @@
 #
 # Table name: users
 #
-#  id                     :bigint           not null, primary key
-#  bank_account_name      :string
-#  bank_account_number    :string
-#  bank_code              :string
-#  email                  :string           not null
-#  image                  :string
-#  name                   :string
-#  oauth_expires_at       :datetime
-#  oauth_token            :string
-#  password_digest        :string
-#  provider               :string
-#  reset_password_sent_at :datetime
-#  reset_password_token   :string
-#  role                   :integer          default("user"), not null
-#  uid                    :string
-#  created_at             :datetime         not null
-#  updated_at             :datetime         not null
+#  id                           :bigint           not null, primary key
+#  bank_account_name            :string
+#  bank_account_number          :string
+#  bank_code                    :string
+#  email                        :string           not null
+#  image                        :string
+#  name                         :string
+#  oauth_expires_at             :datetime
+#  oauth_token                  :string
+#  password_digest              :string
+#  provider                     :string
+#  reset_password_sent_at       :datetime
+#  reset_password_token         :string
+#  role                         :integer          default("user"), not null
+#  uid                          :string
+#  created_at                   :datetime         not null
+#  updated_at                   :datetime         not null
+#  default_shipping_provider_id :bigint
 #
 # Indexes
 #
-#  index_users_on_email  (email) UNIQUE
+#  index_users_on_default_shipping_provider_id  (default_shipping_provider_id)
+#  index_users_on_email                         (email) UNIQUE
+#
+# Foreign Keys
+#
+#  fk_rails_...  (default_shipping_provider_id => shipping_providers.id)
 #
 class User < ApplicationRecord
   has_secure_password
@@ -49,6 +55,7 @@ class User < ApplicationRecord
   has_many :orders, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
   has_many :credit_ledgers, -> { order(created_at: :asc) }
+  belongs_to :default_shipping_provider, class_name: "ShippingProvider", optional: true
 
   # Bank code
   def bank_name

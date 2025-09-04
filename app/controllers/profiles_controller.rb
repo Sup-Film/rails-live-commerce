@@ -30,6 +30,6 @@ class ProfilesController < ApplicationController
   end
 
   def profile_params
-    params.require(:user).permit(:name, :bank_account_number, :bank_account_name, :bank_code)
+    params.require(:user).permit(:name, :bank_account_number, :bank_account_name, :bank_code, :default_shipping_provider_id)
   end
 end

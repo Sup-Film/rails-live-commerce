@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_09_02_063630) do
+ActiveRecord::Schema[7.1].define(version: 2025_09_04_035446) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -139,6 +139,15 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_02_063630) do
     t.index ["user_id"], name: "index_products_on_user_id"
   end
 
+  create_table "shipping_providers", force: :cascade do |t|
+    t.string "code"
+    t.string "name"
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_shipping_providers_on_code", unique: true
+  end
+
   create_table "subscriptions", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.integer "status", default: 0, null: false
@@ -179,6 +188,8 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_02_063630) do
     t.string "bank_code"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
+    t.bigint "default_shipping_provider_id"
+    t.index ["default_shipping_provider_id"], name: "index_users_on_default_shipping_provider_id"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 
@@ -191,4 +202,5 @@ ActiveRecord::Schema[7.1].define(version: 2025_09_02_063630) do
   add_foreign_key "payments", "users", column: "verified_by_id"
   add_foreign_key "products", "users"
   add_foreign_key "subscriptions", "users"
+  add_foreign_key "users", "shipping_providers", column: "default_shipping_provider_id"
 end
