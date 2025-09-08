@@ -23,9 +23,9 @@ class InstagramLiveWebhookService
 
   def process_entry(entry)
     value = entry["value"] || entry[:value]
-    Rails.logger.info "Processing Instagram webhook entry value: #{value.inspect}"
+    ApplicationLoggerService.info("instagram.webhook.entry.value", { value: value })
     unless value.is_a?(Hash)
-      Rails.logger.warn "Invalid entry value, skipping"
+      ApplicationLoggerService.warn("instagram.webhook.entry.invalid_value")
       return
     end
 
@@ -40,35 +40,46 @@ class InstagramLiveWebhookService
           value["created_time"] = Time.parse(ts.to_s).utc.iso8601
         end
       rescue => e
-        Rails.logger.warn "Failed to normalize created_time: #{e.class} - #{e.message}"
+        ApplicationLoggerService.warn("instagram.webhook.normalize_created_time.failed", {
+          error_class: e.class.name,
+          error_message: e.message,
+        })
         value["created_time"] = Time.current.utc.iso8601
       end
     end
 
     # ตรวจสอบว่าเป็น live comment เท่านั้น
     if live_comment?(value)
-      Rails.logger.info "Detected Instagram Live comment"
+      ApplicationLoggerService.info("instagram.webhook.detected_live_comment")
       process_live_comment_value(value)
     else
-      Rails.logger.info "Skipping non-live Instagram comment"
+      ApplicationLoggerService.info("instagram.webhook.skipped_non_live_comment")
     end
   end
 
   def process_live_comment_value(value)
-    Rails.logger.info "Instagram Live comment value: #{value.inspect}"
-    comment_id = value["comment_id"] || value["id"]
-    comment_text = value["text"]
-    commenter_id = value.dig("from", "id")
-    commenter_name = value.dig("from", "username")
-    media_id = value.dig(:media, :id)
+    v = value.is_a?(Hash) ? value.with_indifferent_access : {}
+    ApplicationLoggerService.info("instagram.webhook.live_comment.value", { value: v })
+    comment_id = v[:comment_id] || v[:id]
+    comment_text = v[:text]
+    commenter_id = v.dig(:from, :id)
+    commenter_name = v.dig(:from, :username)
+    media_id = v.dig(:media, :id)
 
-    Rails.logger.info "Instagram Live comment on media #{media_id}: #{comment_text} by #{commenter_name}"
+    ApplicationLoggerService.info("instagram.webhook.live_comment.summary", {
+      media_id: media_id,
+      comment_text: comment_text,
+      commenter_name: commenter_name,
+    })
 
     # ประมวลผล Instagram Live comment (ส่งต่อไปยัง CommentService แบบ 1:1 ต่อคอมเมนต์)
     begin
-      InstagramLiveCommentService.new(media_id, access_token, user).process_comment(value)
+      InstagramLiveCommentService.new(media_id, access_token, user).process_comment(v)
     rescue => e
-      Rails.logger.error "Failed to process Instagram Live comment: #{e.class} - #{e.message}"
+      ApplicationLoggerService.error("instagram.webhook.process_live_comment.failed", {
+        error_class: e.class.name,
+        error_message: e.message,
+      })
       nil
     end
   end
@@ -76,8 +87,6 @@ class InstagramLiveWebhookService
   private
 
   def live_comment?(value)
-    # Rails.logger.info "Checking if comment is from live video: #{JSON.pretty_generate(value)}"
-    # Rails.logger.info "Media data: #{value.dig(:media, :media_product_type)}"
     media_product_type = value.dig(:media, :media_product_type)
     media_product_type == "live_video"
   end

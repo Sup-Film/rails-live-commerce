@@ -72,7 +72,10 @@ class InstagramLiveCommentService
         []
       end
     rescue => e
-      Rails.logger.error "Failed to fetch Instagram Live comments: #{e.message}"
+      ApplicationLoggerService.error("instagram.fetch_comments.failed", {
+        error_class: e.class.name,
+        error_message: e.message,
+      })
       []
     end
   end
@@ -88,7 +91,10 @@ class InstagramLiveCommentService
         result = process_comment(comment)
         created_orders << result if result.present?
       rescue => e
-        Rails.logger.error "Failed to process an Instagram comment in batch: #{e.class} - #{e.message}"
+        ApplicationLoggerService.error("instagram.batch_process_comment.failed", {
+          error_class: e.class.name,
+          error_message: e.message,
+        })
       end
     end
     created_orders
@@ -102,28 +108,28 @@ class InstagramLiveCommentService
     product_codes = Product.active.where(user_id: user.id).pluck(:productCode).compact.map { |c| c.to_s.strip.downcase }.uniq
 
     if product_codes.empty?
-      Rails.logger.warn "No products found for user: #{user.id}"
+      ApplicationLoggerService.warn("instagram.no_products_for_user", { user_id: user.id })
       return nil
     end
 
     # ตรวจรหัสที่ยาวสุดก่อน
     product_codes.sort_by! { |c| -c.length }
-    Rails.logger.debug "User product codes: #{product_codes.join(", ")}"
+    ApplicationLoggerService.debug("instagram.product_codes", { user_id: user.id, codes: product_codes })
 
     # normalize ข้อความเพื่อตรวจ (lowercase)
     message_norm = message.downcase
-    Rails.logger.debug "Normalized Instagram message: #{message_norm}"
+    ApplicationLoggerService.debug("instagram.message_normalized", { message_norm: message_norm })
 
     # ใช้ parser เดียวกับ FacebookLiveCommentService สำหรับ CF
     found_code = parse_product_code(message_norm, product_codes)
     unless found_code
-      Rails.logger.warn "Product not found in Instagram message: #{message}"
+      ApplicationLoggerService.warn("instagram.product_code_not_found_in_message", { message: message })
       return nil
     end
 
     product = Product.active.find_by(productCode: found_code.to_i)
     unless product
-      Rails.logger.warn "Product not found for code: #{found_code}"
+      ApplicationLoggerService.warn("instagram.product_not_found_for_code", { code: found_code })
       return nil
     end
 
@@ -151,7 +157,7 @@ class InstagramLiveCommentService
           facebook_user_id: data.dig(:from, :id),
           facebook_comment_id: data[:id],
         ))
-      Rails.logger.info "Found existing Instagram order by unique key: #{existing_by_unique.id}"
+      ApplicationLoggerService.info("instagram.order_found_by_unique_key", { order_id: existing_by_unique.id })
       return existing_by_unique
     end
 
@@ -167,7 +173,7 @@ class InstagramLiveCommentService
                           ).first
 
     if existing_order
-      Rails.logger.info "Found existing Instagram order: #{existing_order.order_number}"
+      ApplicationLoggerService.info("instagram.order_duplicate_policy_matched", { order_number: existing_order.order_number })
       return existing_order
     end
 
@@ -193,11 +199,14 @@ class InstagramLiveCommentService
         comment_time: Time.parse(data[:created_time]),
       )
 
-      Rails.logger.info "Instagram order created: #{order.order_number}"
+      ApplicationLoggerService.info("instagram.order_created", { order_number: order.order_number, order_id: order.id })
       return order
     rescue ActiveRecord::RecordNotUnique, PG::UniqueViolation => e
       # กัน race condition: อีกโปรเซสอาจสร้างไปก่อน
-      Rails.logger.warn "Duplicate detected on create (race). Falling back to lookup: #{e.class}: #{e.message}"
+      ApplicationLoggerService.warn("instagram.order_create.duplicate_race", {
+        error_class: e.class.name,
+        error_message: e.message,
+      })
       if (existing = Order.where(deleted_at: nil).find_by(
             user: user,
             facebook_user_id: data.dig(:from, :id),
@@ -207,10 +216,16 @@ class InstagramLiveCommentService
       end
       return nil
     rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.error "Failed to create Instagram order: #{e.message}"
+      ApplicationLoggerService.error("instagram.order_create.failed_validation", {
+        error_class: e.class.name,
+        error_message: e.message,
+      })
       return nil
     rescue StandardError => e
-      Rails.logger.error "Unexpected error creating Instagram order: #{e.message}"
+      ApplicationLoggerService.error("instagram.order_create.unexpected_error", {
+        error_class: e.class.name,
+        error_message: e.message,
+      })
       return nil
     end
   end
