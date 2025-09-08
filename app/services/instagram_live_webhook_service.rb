@@ -47,6 +47,7 @@ class InstagramLiveWebhookService
 
     # ตรวจสอบว่าเป็น live comment เท่านั้น
     if live_comment?(value)
+      Rails.logger.info "Detected Instagram Live comment"
       process_live_comment_value(value)
     else
       Rails.logger.info "Skipping non-live Instagram comment"
@@ -59,7 +60,7 @@ class InstagramLiveWebhookService
     comment_text = value["text"]
     commenter_id = value.dig("from", "id")
     commenter_name = value.dig("from", "username")
-    media_id = value.dig("media", "id")
+    media_id = value.dig(:media, :id)
 
     Rails.logger.info "Instagram Live comment on media #{media_id}: #{comment_text} by #{commenter_name}"
 
@@ -75,8 +76,9 @@ class InstagramLiveWebhookService
   private
 
   def live_comment?(value)
-    # ตรวจสอบว่าเป็น live_video เท่านั้น
-    media_product_type = value.dig("media", "media_product_type")
+    # Rails.logger.info "Checking if comment is from live video: #{JSON.pretty_generate(value)}"
+    # Rails.logger.info "Media data: #{value.dig(:media, :media_product_type)}"
+    media_product_type = value.dig(:media, :media_product_type)
     media_product_type == "live_video"
   end
 end

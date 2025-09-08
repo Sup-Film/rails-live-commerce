@@ -5,7 +5,7 @@ class FacebookLiveCommentService
     @user = user # ใช้สำหรับหา Merchant ในการสร้าง Order
 
     # Log เริ่มต้น service
-    ApplicationLogger.business_event("facebook_live_comment_service_initialized", {
+    ApplicationLoggerService.business_event("facebook_live_comment_service_initialized", {
       live_id: @live_id,
       user_id: @user&.id,
       has_access_token: @access_token.present?,
@@ -15,7 +15,7 @@ class FacebookLiveCommentService
   def fetch_comments
     start_time = Time.current
 
-    ApplicationLogger.info("Starting to fetch comments", {
+    ApplicationLoggerService.info("Starting to fetch comments", {
       live_id: @live_id,
       user_id: @user&.id,
     })
@@ -49,7 +49,7 @@ class FacebookLiveCommentService
       comments = response.parsed_response.dig("data") || []
       duration = ((Time.current - start_time) * 1000).round(2)
 
-      ApplicationLogger.performance("fetch_facebook_comments", duration, {
+      ApplicationLoggerService.performance("fetch_facebook_comments", duration, {
         live_id: @live_id,
         comments_count: comments.size,
         user_id: @user.id,
@@ -73,7 +73,7 @@ class FacebookLiveCommentService
       end
       created_orders
     else
-      ApplicationLogger.error("Failed to fetch Facebook comments", {
+      ApplicationLoggerService.error("Failed to fetch Facebook comments", {
         live_id: @live_id,
         status_code: response.code,
         error_body: response.body,
@@ -83,7 +83,7 @@ class FacebookLiveCommentService
     end
   rescue StandardError => e
     duration = ((Time.current - start_time) * 1000).round(2)
-    ApplicationLogger.error("Exception in fetch_comments", {
+    ApplicationLoggerService.error("Exception in fetch_comments", {
       live_id: @live_id,
       user_id: @user&.id,
       duration_ms: duration,
@@ -95,7 +95,7 @@ class FacebookLiveCommentService
   end
 
   def create_order(data)
-    ApplicationLogger.debug("Attempting to create order", {
+    ApplicationLoggerService.debug("Attempting to create order", {
       comment_id: data[:id],
       product_codes: data[:product_codes],
       user_id: @user&.id,
@@ -107,7 +107,7 @@ class FacebookLiveCommentService
     product_codes = Product.active.where(user_id: @user.id).pluck(:productCode).compact.map { |c| c.to_s.strip.downcase }.uniq
 
     if product_codes.empty?
-      ApplicationLogger.warn("Product not found for comment", {
+      ApplicationLoggerService.warn("Product not found for comment", {
         comment_id: data[:id],
         product_codes: product_codes,
         user_id: @user&.id,
@@ -124,7 +124,7 @@ class FacebookLiveCommentService
     # แยก parser ออกเป็นเมธอด เพื่อลด false positives และทดสอบง่าย
     found_code = parse_product_code(message_norm, product_codes)
     unless found_code
-      ApplicationLogger.warn("Product not found in message", {
+      ApplicationLoggerService.warn("Product not found in message", {
         comment_id: data[:id],
         user_id: @user&.id,
       })
@@ -143,22 +143,16 @@ class FacebookLiveCommentService
     end
     puts "\e[36m[ใช้ merchant] #{@user.name} (ID: #{@user.id})\e[0m"
 
-    puts "\n---------------------"
-    puts "[สร้างออเดอร์ใหม่] Data:"
-    puts JSON.pretty_generate(data)
-    puts "---------------------"
-
     # TODO: ต้องแทนที่ด้วย SkyboxService เพื่อเช็คราคาขนส่ง
     shipping_cost_cents = 5000
     insufficient_credit = !@user.has_sufficient_credit?(shipping_cost_cents)
 
     if insufficient_credit
-      ApplicationLogger.warn("credit.insufficient", {
+      ApplicationLoggerService.warn("credit.insufficient", {
         required_credit_cents: shipping_cost_cents,
         current_balance_cents: @user.credit_balance_cents,
         user_id: @user.id,
       })
-      # ส่งอีเมลแจ้งเตือนแบบ throttle เพื่อป้องกันสแปม
       notify_insufficient_credit_once(
         user: @user,
         product: product,
@@ -206,21 +200,21 @@ class FacebookLiveCommentService
         comment_time: Time.parse(data[:created_time]),
       )
 
-      ApplicationLogger.info("order.create.success", {
+      ApplicationLoggerService.info("order.create.success", {
         order_id: order.id,
         order_number: order.order_number,
         status: order.status,
       })
       return order
     rescue ActiveRecord::RecordInvalid => e
-      ApplicationLogger.error("order.create.failed", {
+      ApplicationLoggerService.error("order.create.failed", {
         error_class: e.class.name,
         error_message: e.message,
         validation_errors: e.record.errors.full_messages,
       })
       return nil
     rescue StandardError => e
-      ApplicationLogger.error("order.create.unexpected_error", {
+      ApplicationLoggerService.error("order.create.unexpected_error", {
         error_class: e.class.name,
         error_message: e.message,
       })
@@ -263,10 +257,10 @@ class FacebookLiveCommentService
     ).deliver_later
 
     Rails.cache.write(cache_key, true, expires_in: 30.minutes)
-    ApplicationLogger.info("credit.insufficient.email_sent", { user_id: user.id })
+    ApplicationLoggerService.info("credit.insufficient.email_sent", { user_id: user.id })
     true
   rescue => e
-    ApplicationLogger.error("credit.insufficient.email_error", {
+    ApplicationLoggerService.error("credit.insufficient.email_error", {
       error_class: e.class.name,
       error_message: e.message,
       user_id: user.id,

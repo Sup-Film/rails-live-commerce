@@ -1,4 +1,4 @@
-class ApplicationLogger
+class ApplicationLoggerService
   class << self
     def info(message, context = {})
       log(:info, message, context)
