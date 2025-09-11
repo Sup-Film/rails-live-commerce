@@ -35,10 +35,16 @@ class FacebookLiveWebhookService
   def process_live_change(change)
     # Rails.logger.info "Processing live change: #{change.inspect}"
     value = change["value"]
+    live_id = value["id"]
+    cache_key = "polling_job_live_#{live_id}"
 
     case value["status"]
     when "live"
+      Rails.cache.write(cache_key, "run", expires_in: 24.hours)
       handle_live_started(value)
+    when "live_stopped"
+      Rails.cache.write(cache_key, "stop", expires_in: 1.hour)
+      ApplicationLoggerService.info("live_video.stopped", { live_id: live_id, user_id: user.id })
     end
   end
 
@@ -56,7 +62,6 @@ class FacebookLiveWebhookService
       access_token: access_token,
       user_id: user.id,
       since_unix: since_unix,
-      interval_seconds: 5,
       limit: 50,
       filter: "toplevel",
       live_filter: "stream",
