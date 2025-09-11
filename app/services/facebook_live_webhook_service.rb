@@ -43,8 +43,24 @@ class FacebookLiveWebhookService
   end
 
   def handle_live_started(value)
-    # FacebookLiveProcessor.new(value).process_live_start
-    FacebookLiveCommentService.new(value["id"], access_token, user).fetch_comments
+    # ดึงครั้งแรกทันที เพื่อกันพลาดคอมเมนต์ช่วงเริ่มไลฟ์
+    initial_result = FacebookLiveCommentService
+      .new(value["id"], access_token, user)
+      .fetch_comments(limit: 50, filter: "toplevel", live_filter: "stream")
+
+    # ตั้งค่า since_unix จากเวลาคอมเมนต์ล่าสุดใน response (ถ้าไม่มี ใช้เวลาปัจจุบัน)
+    since_unix = initial_result[:latest_comment_unix] || Time.current.to_i
+
+    PollFacebookLiveCommentsJob.perform_later(
+      live_id: value["id"],
+      access_token: access_token,
+      user_id: user.id,
+      since_unix: since_unix,
+      interval_seconds: 5,
+      limit: 50,
+      filter: "toplevel",
+      live_filter: "stream",
+    )
   end
 end
 

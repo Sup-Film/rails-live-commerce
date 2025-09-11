@@ -2,9 +2,8 @@ class FacebookLiveCommentService
   def initialize(live_id, access_token = nil, user = nil)
     @live_id = live_id
     @access_token = access_token
-    @user = user # ใช้สำหรับหา Merchant ในการสร้าง Order
+    @user = user
 
-    # Log เริ่มต้น service
     ApplicationLoggerService.business_event("facebook_live_comment_service_initialized", {
       live_id: @live_id,
       user_id: @user&.id,
@@ -12,7 +11,11 @@ class FacebookLiveCommentService
     })
   end
 
-  def fetch_comments
+  # ดึงคอมเมนต์จาก Live Video หนึ่งครั้ง (pull one-shot)
+  # กำหนด since_unix (Unix timestamp) เพื่อดึงเฉพาะคอมเมนต์ใหม่ ๆ หลังเวลาที่กำหนด
+  # คืนค่าเป็น Hash: { orders:, comments:, latest_comment_unix: }
+  # ตัวอย่าง: fetch_comments(since_unix: 1.minute.ago.to_i, limit: 50, filter: "toplevel", live_filter: "stream")
+  def fetch_comments(since_unix: nil, limit: 50, order: "reverse_chronological", filter: "toplevel", live_filter: "no_filter")
     start_time = Time.current
 
     ApplicationLoggerService.info("Starting to fetch comments", {
@@ -22,31 +25,33 @@ class FacebookLiveCommentService
 
     unless @user
       puts "\e[31m[ไม่พบ User (merchant)]\e[0m"
-      return []
+      return { orders: [], comments: [], latest_comment_unix: nil }
     end
 
     if @user.products.empty?
       puts "\e[31m[ผู้ขายยังไม่ได้ทำก่ีเพิ่มสินค้าในระบบ] User ID: #{@user.id}\e[0m"
-      return []
+      return { orders: [], comments: [], latest_comment_unix: nil }
     end
 
-    url = "https://streaming-graph.facebook.com/#{@live_id}/live_comments?access_token=#{@access_token}&comment_rate=one_per_two_seconds&fields=from{id,name},message,created_time"
-    response = HTTParty.get(url)
+    query = {
+      access_token: @access_token,
+      fields: "id,from{id,name},message,created_time",
+      order: order,
+      filter: filter,
+      live_filter: live_filter,
+      limit: limit,
+    }
+    query[:since] = since_unix if since_unix
 
-    if response.success?
-      # TODO: Mock response data for testing
-      comments = [
-        # สร้าง comment สำหรับ productCode 1
-        *Array.new(2) { |i| { "id" => "c1_#{i}", "message" => "CF 1", "created_time" => "2023-10-01T12:00:00+0000", "from" => { "id" => "user#{i}", "name" => "User #{i}" } } },
-        # สร้าง comment สำหรับ productCode 2
-        *Array.new(2) { |i| { "id" => "c2_#{i}", "message" => "CF 2", "created_time" => "2023-10-01T12:01:00+0000", "from" => { "id" => "user#{i + 2}", "name" => "User #{i + 2}" } } },
-        # สร้าง comment สำหรับ productCode 3
-        *Array.new(2) { |i| { "id" => "c3_#{i}", "message" => "CF 3", "created_time" => "2023-10-01T12:02:00+0000", "from" => { "id" => "user#{i + 10}", "name" => "User #{i + 10}" } } },
-        # สร้าง comment สำหรับ productCode 12342
-        *Array.new(2) { |i| { "id" => "c4#{i}", "message" => "CF 4", "created_time" => "2023-10-01T12:03:00+0000", "from" => { "id" => "user#{i + 12}", "name" => "User #{i + 12}" } } },
-      ].flatten
+    response = HTTParty.get(
+      "https://graph.facebook.com/v23.0/#{@live_id}/comments",
+      query: query,
+      headers: { "Accept" => "application/json" },
+    )
 
-      comments = response.parsed_response.dig("data") || []
+    content_type = (response.headers["content-type"] || "").to_s
+    if response.success? && content_type.include?("application/json")
+      comments = Array(response.parsed_response.dig("data"))
       duration = ((Time.current - start_time) * 1000).round(2)
 
       ApplicationLoggerService.performance("fetch_facebook_comments", duration, {
@@ -55,7 +60,6 @@ class FacebookLiveCommentService
         user_id: @user.id,
       })
 
-      # นำข้อมูลใน comment มาวนลูป และทำการสร้าง Hash ใหม่สำหรับแต่ละ comment
       created_orders = []
       comments.each do |comment|
         comment_data = {
@@ -69,17 +73,27 @@ class FacebookLiveCommentService
         }
 
         cf_result = create_order(comment_data)
-        created_orders << cf_result if cf_result.present?
+      created_orders << cf_result if cf_result.present?
       end
-      created_orders
+      latest_comment_unix = comments.map do |c|
+        begin
+          Time.parse(c["created_time"]).to_i if c["created_time"].present?
+        rescue
+          nil
+        end
+      end.compact.max
+
+      { orders: created_orders, comments: comments, latest_comment_unix: latest_comment_unix }
     else
+      error_preview = response.body.to_s[0, 500]
       ApplicationLoggerService.error("Failed to fetch Facebook comments", {
         live_id: @live_id,
         status_code: response.code,
-        error_body: response.body,
+        content_type: content_type,
+        error_body: error_preview,
         user_id: @user.id,
       })
-      []
+      { orders: [], comments: [], latest_comment_unix: nil }
     end
   rescue StandardError => e
     duration = ((Time.current - start_time) * 1000).round(2)
@@ -91,7 +105,7 @@ class FacebookLiveCommentService
       error_message: e.message,
       backtrace: e.backtrace&.first(5),
     })
-    []
+    { orders: [], comments: [], latest_comment_unix: nil }
   end
 
   def create_order(data)
@@ -230,7 +244,7 @@ class FacebookLiveCommentService
     sorted = product_codes.sort_by { |c| -c.length }
 
     # จับรูปแบบ CF123, CF 123, CF-123, CF:123, CF_123, CF/123
-    if (m = message_norm.match(/(?:^|\s)cf[\s:\-_/]*([0-9]{1,10})(?=\D|$)/i))
+    if (m = message_norm.match(%r{(?:^|\s)cf[\s:\-_\/]*([0-9]{1,10})(?=\D|$)}i))
       candidate = m[1].to_s
       return candidate if sorted.include?(candidate)
     end

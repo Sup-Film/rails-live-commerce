@@ -25,7 +25,7 @@ class Rack::Attack
   end
 
   # Custom response: กำหนดข้อความที่จะแสดงเมื่อถูกบล็อค
-  self.throttled_response = ->(env) {
+  self.throttled_responder = ->(env) {
     # บังคับ redirect ทุกกรณี (เหมาะกับเว็บที่ไม่มี API)
     [
       302,

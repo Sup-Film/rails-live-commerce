@@ -89,7 +89,7 @@ two:
 # เพิ่ม fixture สำหรับเคสที่จะทดสอบการสร้างออเดอร์ซ้ำ
 # สำหรับ test "should not create duplicate order for the same comment and user"
 existing_order_for_duplicate_test:
-  order_number: "CF7777" # ตรงกับที่ใช้ใน test case
+  order_number: "7777" # ตรงกับรหัสสินค้าที่ parse ได้จากข้อความ (ไม่รวม CF)
   status: 0 # pending
   product: one # อ้างอิง product ที่ถูกใช้ใน test case
   user: one # อ้างอิง user ที่ถูกใช้ใน test case
