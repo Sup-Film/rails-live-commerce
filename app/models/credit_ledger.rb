@@ -16,10 +16,11 @@
 #
 # Indexes
 #
-#  index_credit_ledgers_on_entry_type       (entry_type)
-#  index_credit_ledgers_on_idempotency_key  (idempotency_key) UNIQUE
-#  index_credit_ledgers_on_reference        (reference_type,reference_id)
-#  index_credit_ledgers_on_user_id          (user_id)
+#  index_credit_ledgers_on_entry_type              (entry_type)
+#  index_credit_ledgers_on_idempotency_key         (idempotency_key) UNIQUE
+#  index_credit_ledgers_on_reference               (reference_type,reference_id)
+#  index_credit_ledgers_on_user_id                 (user_id)
+#  index_credit_ledgers_on_user_id_and_created_at  (user_id,created_at)
 #
 # Foreign Keys
 #

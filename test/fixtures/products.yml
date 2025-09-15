@@ -15,8 +15,9 @@
 #
 # Indexes
 #
-#  index_products_on_deleted_at  (deleted_at)
-#  index_products_on_user_id     (user_id)
+#  index_products_on_deleted_at               (deleted_at)
+#  index_products_on_user_id                  (user_id)
+#  index_products_on_user_id_and_productCode  (user_id,productCode)
 #
 # Foreign Keys
 #

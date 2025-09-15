@@ -39,6 +39,7 @@
 #  index_orders_on_facebook_user_id_and_created_at  (facebook_user_id,created_at)
 #  index_orders_on_order_number                     (order_number)
 #  index_orders_on_product_id                       (product_id)
+#  index_orders_on_status_and_created_at            (status,created_at)
 #  index_orders_on_user_id                          (user_id)
 #  index_orders_on_user_id_and_status               (user_id,status)
 #
