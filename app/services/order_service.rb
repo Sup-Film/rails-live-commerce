@@ -43,7 +43,7 @@ class OrderService
       )
     end
 
-    เปลี่ยนสถานะเป็น completed
+    # เปลี่ยนสถานะเป็น completed
     def complete_order(order, payment_info = {})
       return false unless order.present? && order.pending?
 
