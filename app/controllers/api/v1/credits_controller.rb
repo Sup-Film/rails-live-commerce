@@ -1,39 +1,39 @@
 class Api::V1::CreditsController < ApplicationController
   def top_up
     # ตรวจสอบ Parameter
-    # unless slip_params[:sending_book].present? && slip_params[:transaction_code].present?
-    #   return render json: {
-    #                   message: "กรุณาระบุข้อมูลสลิปให้ครบถ้วน",
-    #                   errors: {
-    #                     sending_book: "จำเป็นต้องระบุ",
-    #                     transaction_code: "จำเป็นต้องระบุ",
-    #                   },
-    #                 }, status: :bad_request
-    # end
+    unless slip_params[:sending_book].present? && slip_params[:transaction_code].present?
+      return render json: {
+                      message: "กรุณาระบุข้อมูลสลิปให้ครบถ้วน",
+                      errors: {
+                        sending_book: "จำเป็นต้องระบุ",
+                        transaction_code: "จำเป็นต้องระบุ",
+                      },
+                    }, status: :bad_request
+    end
 
     # # ตรวจสอบสลิปผ่าน SlipVerifyService
-    # data_verify = SlipVerifyService.verify_slip(
-    #   slip_params[:sending_book],
-    #   slip_params[:transaction_code]
-    # )
+    data_verify = SlipVerifyService.verify_slip(
+      slip_params[:sending_book],
+      slip_params[:transaction_code]
+    )
 
-    # unless data_verify["statusCode"] == "0000"
-    #   return render json: {
-    #                   message: data_verify["message"] || "ใบเสร็จไม่ถูกต้อง หรือ ไม่สามารถตรวจสอบได้",
-    #                 }, status: :unprocessable_entity
-    # end
+    unless data_verify["statusCode"] == "0000"
+      return render json: {
+                      message: data_verify["message"] || "ใบเสร็จไม่ถูกต้อง หรือ ไม่สามารถตรวจสอบได้",
+                    }, status: :unprocessable_entity
+    end
 
-    # verified_data = data_verify["data"]
-    # trans_ref = verified_data["transRef"]
-    # amount_cents = verified_data["amount"].to_f * 100 # แปลงเป็น Cents
+    verified_data = data_verify["data"]
+    trans_ref = verified_data["transRef"]
+    amount_cents = verified_data["amount"].to_f * 100 # แปลงเป็น Cents
 
     # Mockup data
-    verified_data = {
-      "transRef" => "mock_trans_ref_#{SecureRandom.hex(6)}",
-      "amount" => "500"
-    }
-    trans_ref = verified_data["transRef"]
-    amount_cents = (verified_data["amount"].to_f * 100).round # แปลงเป็น Cents
+    # verified_data = {
+    #   "transRef" => "mock_trans_ref_#{SecureRandom.hex(6)}",
+    #   "amount" => "500"
+    # }
+    # trans_ref = verified_data["transRef"]
+    # amount_cents = (verified_data["amount"].to_f * 100).round # แปลงเป็น Cents
 
     # 4. เรียกใช้ CreditService เพื่อเติมเงิน
     CreditService.top_up(
@@ -60,6 +60,6 @@ class Api::V1::CreditsController < ApplicationController
   private
 
   def slip_params
-    params.permit(:sending_bank, :transaction_code)
+    params.permit(:sending_book, :transaction_code)
   end
 end
