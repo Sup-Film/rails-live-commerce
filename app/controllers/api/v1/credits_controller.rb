@@ -1,4 +1,8 @@
 class Api::V1::CreditsController < ApplicationController
+  before_action :authenticate_user!
+
+  # POST /api/v1/credits/top_up
+
   def top_up
     # ตรวจสอบ Parameter
     unless slip_params[:sending_book].present? && slip_params[:transaction_code].present?

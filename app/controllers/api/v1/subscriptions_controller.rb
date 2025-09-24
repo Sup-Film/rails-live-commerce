@@ -1,4 +1,8 @@
 class Api::V1::SubscriptionsController < Api::V1::BaseController
+  before_action :authenticate_user!
+
+  # POST /api/v1/subscriptions/verify_slip
+
   # ค่าคงที่สำหรับการตรวจสอบ
   REQUIRED_AMOUNT = 299.00
   OUR_BANK_NUMBER = "1466144693".freeze
@@ -20,16 +24,16 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
     end
 
     # ตรวจสอบว่าผู้ใช้มี subscription อยู่แล้วและยังไม่หมดอายุ
-    # subscription = current_user.current_subscription
-    # if subscription_conflict?(subscription)
-    #   return render json: {
-    #                   message: "คุณมีสมาชิกที่ใช้งานอยู่แล้ว",
-    #                   subscription: {
-    #                     status: subscription.status,
-    #                     expires_at: subscription.expires_at,
-    #                   },
-    #                 }, status: :conflict
-    # end
+    subscription = current_user.current_subscription
+    if subscription_conflict?(subscription)
+      return render json: {
+                      message: "คุณมีสมาชิกที่ใช้งานอยู่แล้ว",
+                      subscription: {
+                        status: subscription.status,
+                        expires_at: subscription.expires_at,
+                      },
+                    }, status: :conflict
+    end
 
     # ตรวจสอบสลิปผ่าน SlipVerifyService
     data_verify = SlipVerifyService.verify_slip(
@@ -142,7 +146,7 @@ class Api::V1::SubscriptionsController < Api::V1::BaseController
       end
 
       if subscription.save
-        # ProcessHeldOrdersJob.perform_later(current_user.id)
+        ProcessHeldOrdersJob.perform_later(current_user.id)
 
         render json: {
           message: "เปิดใช้งานสมาชิกสำเร็จ!",
